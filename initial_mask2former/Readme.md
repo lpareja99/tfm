@@ -1,6 +1,6 @@
-1. Build img `docker-compose up -d --build` (~10min)
+1. Build img `docker compose up -d --build` (~10min)
 
-2. Start container witout building `docker-compose up -d`
+2. Start container witout building `docker compose up -d`
 
 3. Access Container `docker exec -it road_defect_tfm bash`
 

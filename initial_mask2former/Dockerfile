@@ -14,16 +14,14 @@ RUN pip install -r requirements.txt
 # Install mmsegmentation directly from the source into the container
 # This way, you don't have it in your repo, but the container HAS it.
 RUN pip install "mmsegmentation>=1.0.0"
+RUN pip install openmim && mim install mmdet
 
-
-# Copy your specific project files into the container
-COPY . .
 
 ENV TORCH_HOME=/mmsegmentation/.cache
 ENV MMENGINE_CACHE_DIR=/mmsegmentation/.cache
 
-RUN pip install -v -e .
-RUN mim install mmdet
+# Copy your specific project files into the container
+COPY . .
 
 # Command to keep the container running
 CMD ["bash"]

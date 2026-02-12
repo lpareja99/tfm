@@ -1,6 +1,6 @@
 import os
 
-_base_ = ['mmseg::mask2former/mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
+_base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
 log_level = 'INFO'
 
 # 1. Model Config
@@ -20,7 +20,7 @@ model = dict(
 
 # 2. Iteration BAtch
 dataset_type = 'BaseSegDataset'
-data_root = 'data/flowity_test/some_defects/some_defects'
+data_root = 'data/flowity_test/some_defects'
 
 train_dir = f'{data_root}/images/training'
 num_imgs = len([f for f in os.listdir(train_dir) if f.endswith(('.png', '.jpg', '.jpeg'))])

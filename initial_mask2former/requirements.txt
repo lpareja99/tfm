@@ -1,6 +1,17 @@
+numpy<2.0.0
+
+# OpenMMLab Core
 openmim
-torch==1.11.0
-torchvision==0.12.0
-mmengine
-mmcv==2.0.0
+mmengine>=0.7.4
+mmcv>=2.0.0
 mmdet>=3.0.0
+mmsegmentation>=1.2.2
+
+# Mask2Former Specifics
+scipy
+ftfy
+regex
+
+# Visualization & Utils
+matplotlib
+opencv-python
