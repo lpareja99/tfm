@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  mmseg-dev:
+    build: .
+    container_name: road_defect_tfm
+    runtime: nvidia # Enables GPU access
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    working_dir: /app
+    stdin_open: true # Equivalent to -i
+    tty: true

@@ -1,0 +1,6 @@
+openmim
+torch==1.11.0
+torchvision==0.12.0
+mmengine
+mmcv==2.0.0
+mmdet>=3.0.0
