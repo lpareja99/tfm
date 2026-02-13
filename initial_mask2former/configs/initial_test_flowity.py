@@ -57,9 +57,10 @@ default_hooks = dict(
         max_keep_ckpts=3, 
         save_best='mIoU',
         out_dir=f'{work_dir}/checkpoints',
-        sampler_seed=dict(type='DistSamplerSeedHook'),
-        visualization=dict(type='SegVisualizationHook', draw=True, interval=1)
     ),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    visualization=dict(type='SegVisualizationHook', draw=True, interval=1)
+    
 )
 
 visualizer = dict(
@@ -109,7 +110,6 @@ test_pipeline = [
     dict(type='PackSegInputs')
 ]
 
-
 train_dataloader = dict(
     batch_size=1, # Safety for your 4070
     dataset=dict(
@@ -119,7 +119,6 @@ train_dataloader = dict(
         metainfo=metainfo,
         pipeline=train_pipeline,
         reduce_zero_label=False))
-
 
 val_dataloader = dict(
     batch_size=1,
@@ -134,8 +133,9 @@ val_dataloader = dict(
 test_dataloader = val_dataloader
 
 
-
 # Running Settings
+log_file = f'{work_dir}/training_progress.log'
+work_dir = work_dir
 train_cfg = dict(type='IterBasedTrainLoop', max_iters=total_iters, val_interval=val_interval)
 param_scheduler = [
     dict(type='PolyLR', begin=0, end=total_iters, power=0.9, by_epoch=False)

@@ -7,3 +7,7 @@
 4. Train data `mim train mmseg configs/initial_test_flowity.py`
 
 5. Test Data 
+
+6. Loss Curve
+
+7. mIoU Curve
