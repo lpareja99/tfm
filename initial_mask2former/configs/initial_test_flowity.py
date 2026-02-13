@@ -2,6 +2,23 @@ import os
 
 _base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
 log_level = 'INFO'
+work_dir = './work_dirs/initial_test_flowity'
+
+# Iteration Logic
+dataset_type = 'BaseSegDataset'
+data_root = 'data/flowity_test/some_defects'
+
+# Calculate the number of iterations based on your dataset and desired epochs
+train_dir = f'{data_root}/images/training'
+num_imgs = len([f for f in os.listdir(train_dir) if f.endswith(('.png', '.jpg', '.jpeg'))])
+
+target_epochs = 100
+val_per_epoch = 10 # How many times per training session to validate
+total_iters = num_imgs * target_epochs
+val_interval = max(1, total_iters // val_per_epoch)
+
+print(f"---> Training for {target_epochs} epochs ({total_iters} total iterations).")
+
 
 # 1. Model Config
 model = dict(
@@ -13,28 +30,10 @@ model = dict(
             use_sigmoid=False,
             loss_weight=2.0,
             reduction='mean',
-            class_weight=[1.0] * 18) # Match your class count
+            class_weight=[1.0] * 18) # 17 classes + bg
     )
 )
 
-
-# 2. Iteration BAtch
-dataset_type = 'BaseSegDataset'
-data_root = 'data/flowity_test/some_defects'
-
-train_dir = f'{data_root}/images/training'
-num_imgs = len([f for f in os.listdir(train_dir) if f.endswith(('.png', '.jpg', '.jpeg'))])
-
-target_epochs = 100
-val_per_epoch = 10 # How many times per training session to validate
-
-# 3. Calculate the math
-total_iters = num_imgs * target_epochs
-val_interval = max(1, total_iters // val_per_epoch)
-
-print(f"\n---> Dataset contains {num_imgs} images.")
-print(f"---> Training for {target_epochs} epochs ({total_iters} total iterations).")
-print(f"---> Validating every {val_interval} iterations.\n")
 
 # 3. Early Stopping and Hooks
 custom_hooks = [
@@ -44,39 +43,42 @@ custom_hooks = [
         rule='greater',      # Stop if mIoU stops increasing
         min_delta=0.005,     # Minimum change to count as an improvement
         patience=3,          # Number of validations to wait
-        strict=False)
-]
-
-# Ensure the evaluator is present so the hook has data to monitor
-val_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU'])
-test_evaluator = val_evaluator
-
-# 4. Training Config and Schedulers
-
-# Use the dynamic variables here
-train_cfg = dict(type='IterBasedTrainLoop', max_iters=total_iters, val_interval=val_interval)
-
-param_scheduler = [
-    dict(type='PolyLR', begin=0, end=total_iters, power=0.9, by_epoch=False)
+    )
 ]
 
 default_hooks = dict(
+    timer=dict(type='IterTimerHook'),
+    logger=dict(type='LoggerHook', interval=50),
+    param_scheduler=dict(type='ParamSchedulerHook'),
     checkpoint=dict(
         type='CheckpointHook', 
         by_epoch=False, 
-        interval=val_interval, # Save a checkpoint every time we validate
-        max_keep_ckpts=3,       # Only keep the 3 best/latest to save disk space
-        save_best='mIoU'
-    )
-    
+        interval=val_interval, 
+        max_keep_ckpts=3, 
+        save_best='mIoU',
+        out_dir=f'{work_dir}/checkpoints',
+        sampler_seed=dict(type='DistSamplerSeedHook'),
+        visualization=dict(type='SegVisualizationHook', draw=True, interval=1)
+    ),
 )
 
 visualizer = dict(
     type='SegLocalVisualizer', 
     vis_backends=[dict(type='LocalVisBackend')], 
-    name='visualizer'
+    save_dir=f'{work_dir}/results',
+    name='visualizer',
+    alpha=0.6
 )
 
+# Ensure the evaluator is present so the hook has data to monitor
+val_evaluator = dict(
+    type='IoUMetric',
+    iou_metrics=['mIoU', 'mDice', 'mFscore'])
+
+
+test_evaluator = val_evaluator
+
+# Metadata
 class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe", "edge_breaks", 
                "fretting", "pothole", "manhole", "patched", "bad_joint", "joint", 
                "large_repair", "loose_stones", "pole_shadow", "sill", "tyre_mark", "edge_grass")
@@ -130,3 +132,11 @@ val_dataloader = dict(
         reduce_zero_label=False))
 
 test_dataloader = val_dataloader
+
+
+
+# Running Settings
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=total_iters, val_interval=val_interval)
+param_scheduler = [
+    dict(type='PolyLR', begin=0, end=total_iters, power=0.9, by_epoch=False)
+]
