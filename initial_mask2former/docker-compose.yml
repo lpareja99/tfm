@@ -1,10 +1,14 @@
-version: '3.8'
-
 services:
   mmseg-dev:
     build: .
     container_name: road_defect_tfm
     runtime: nvidia # Enables GPU access
+    ipc: host
+    deploy:
+      resources:
+        limits:
+          cpus: '16.0'
+          memory: 16G
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
@@ -13,3 +17,32 @@ services:
     working_dir: /app
     stdin_open: true # Equivalent to -i
     tty: true
+
+  tensorboard:
+    build: .
+    container_name: tensorboard
+    volumes:
+      - ./work_dirs:/app/work_dirs
+    ipc: host
+    working_dir: /app
+    ports:
+      - "6007:6006"
+    stdin_open: true # Equivalent to -i
+    tty: true
+    command: sh -c "tensorboard --logdir /app/work_dirs --host 0.0.0.0 --port 6006"
+    restart: unless-stopped
+
+  jupyter:
+    build: .
+    container_name: jupyter
+    runtime: nvidia
+    ipc: host
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''
+  

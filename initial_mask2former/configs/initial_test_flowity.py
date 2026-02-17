@@ -1,4 +1,5 @@
 import os
+from tensorboardX.summary import SummaryWriter
 
 _base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
 log_level = 'INFO'
@@ -12,9 +13,10 @@ data_root = 'data/flowity_test/some_defects'
 train_dir = f'{data_root}/images/training'
 num_imgs = len([f for f in os.listdir(train_dir) if f.endswith(('.png', '.jpg', '.jpeg'))])
 
-target_epochs = 100
+target_epochs = 100 
 val_per_epoch = 10 # How many times per training session to validate
-total_iters = num_imgs * target_epochs
+batch_size = 2
+total_iters = (num_imgs // batch_size) * target_epochs
 val_interval = max(1, total_iters // val_per_epoch)
 
 print(f"---> Training for {target_epochs} epochs ({total_iters} total iterations).")
@@ -48,7 +50,7 @@ custom_hooks = [
 
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
-    logger=dict(type='LoggerHook', interval=50),
+    logger=dict(type='LoggerHook', interval=100),
     param_scheduler=dict(type='ParamSchedulerHook'),
     checkpoint=dict(
         type='CheckpointHook', 
@@ -59,13 +61,33 @@ default_hooks = dict(
         out_dir=f'{work_dir}/checkpoints',
     ),
     sampler_seed=dict(type='DistSamplerSeedHook'),
-    visualization=dict(type='SegVisualizationHook', draw=True, interval=1)
+    visualization=dict(
+        type='SegVisualizationHook', 
+        draw=False,
+        interval=1)
     
 )
 
+
+
+layout = {
+    "Performance": {
+        "Accuracy": ["Multiline", ["aAcc", "mAcc"]],
+        "Loss": ["Multiline", ["loss", "loss_ce", "loss_mask"]],
+    },
+    "Validation": {
+        "mIoU": ["Multiline", ["mIoU", "mDice"]],
+    }
+}
+
+vis_backends = [dict(type='LocalVisBackend'),
+                dict(type='TensorboardVisBackend',
+                    save_dir=f'{work_dir}/results/vis_data', 
+                    init_cfg=dict(layout=layout))]
+
 visualizer = dict(
     type='SegLocalVisualizer', 
-    vis_backends=[dict(type='LocalVisBackend')], 
+    vis_backends=vis_backends, 
     save_dir=f'{work_dir}/results',
     name='visualizer',
     alpha=0.6
@@ -111,7 +133,8 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=1, # Safety for your 4070
+    batch_size=batch_size, # Safety for your 4070
+    num_workers=4,
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
@@ -134,7 +157,7 @@ test_dataloader = val_dataloader
 
 
 # Running Settings
-log_file = f'{work_dir}/training_progress.log'
+#log_file = f'{work_dir}/training_progress.log'
 work_dir = work_dir
 train_cfg = dict(type='IterBasedTrainLoop', max_iters=total_iters, val_interval=val_interval)
 param_scheduler = [

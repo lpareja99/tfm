@@ -1,4 +1,10 @@
 numpy<2.0.0
+jupyterlab
+torch>=1.8.0
+ipykernel
+tqdm
+ipywidgets
+Pillow
 
 # OpenMMLab Core
 openmim
@@ -15,3 +21,7 @@ regex
 # Visualization & Utils
 matplotlib
 opencv-python
+seaborn
+tensorboardX
+future 
+tensorboard
