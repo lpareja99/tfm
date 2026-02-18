@@ -1,16 +1,8 @@
-
 _base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
 
-resume = True
+class_names = ("bg", "cracks")
 
-class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe", "edge_breaks", 
-               "fretting", "pothole", "manhole", "patched", "bad_joint", "joint", 
-               "large_repair", "loose_stones", "pole_shadow", "sill", "tyre_mark", "edge_grass")
-
-palette = [[0, 0, 0], [250, 50, 83], [36, 179, 83], [102, 255, 102], [255, 0, 255],
-           [204, 153, 51], [115, 51, 128], [34, 62, 209], [63, 63, 63], [224, 68, 45],
-           [255, 153, 51], [255, 255, 51], [51, 255, 255], [172, 84, 109], [36, 223, 0],
-           [170, 68, 22], [213, 164, 25]]
+palette = [[0, 0, 0], [250, 50, 83]]
 
 metainfo = dict(
     classes=class_names,
@@ -18,18 +10,18 @@ metainfo = dict(
 )
    
 log_level = 'INFO'
-work_dir = './work_dirs/subset_500_flowity_bg'
+work_dir = './work_dirs/combined_cracks_bg'
 
 # Iteration Logic
 dataset_type = 'BaseSegDataset'
-data_root = 'data/subset_500'
+data_root = 'data/combine_crack'
 
 batch_size = 2
-total_iters = 15000
-val_interval = 1500
-num_classes = 17
+max_iterations = 3750 # 750 iters * 5 epochs
+val_interval = 750
+num_classes = 2
 
-print(f"---> Training for {total_iters} iterations.")
+print(f"---> Training for {max_iterations} iterations.")
 
 
 # 1. Model Config
@@ -42,7 +34,7 @@ model = dict(
             use_sigmoid=False,
             loss_weight=2.0,
             reduction='mean',
-            class_weight=[1.0] * (num_classes + 1)) # 17 classes + bg
+            class_weight=[1.0] * (num_classes + 1))
     )
 )
 
@@ -60,7 +52,7 @@ custom_hooks = [
 
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
-    logger=dict(type='LoggerHook', interval=100),
+    logger=dict(type='LoggerHook', interval=100, log_metric_by_epoch=False),
     param_scheduler=dict(type='ParamSchedulerHook'),
     checkpoint=dict(
         type='CheckpointHook', 
@@ -74,7 +66,7 @@ default_hooks = dict(
     visualization=dict(
         type='SegVisualizationHook', 
         draw=False,
-        interval=1)
+        interval=10)
     
 )
 
@@ -147,10 +139,16 @@ test_dataloader = val_dataloader
 # Running Settings
 work_dir = work_dir
 
-train_cfg = dict(type='IterBasedTrainLoop', max_iters=total_iters, val_interval=val_interval)
+train_cfg = dict(
+    _delete_=True,
+    type='IterBasedTrainLoop',  # Changed from EpochBasedTrainLoop
+    max_iters= max_iterations,             # 750 iters * 5 epochs
+    val_interval= val_interval           # Validate exactly once per "epoch"
+)
+
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 
 param_scheduler = [
-    dict(type='PolyLR', begin=0, end=total_iters, power=0.9, by_epoch=False)
+    dict(type='PolyLR', begin=0, end=max_iterations, power=0.9, by_epoch=False)
 ]
