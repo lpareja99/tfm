@@ -17,7 +17,7 @@ dataset_type = 'BaseSegDataset'
 data_root = 'data/combine_crack'
 
 batch_size = 2
-max_iterations = 7500 # 750 iters * 5 epochs
+max_iterations = 3000 # 750 iters * 5 epochs
 val_interval = 750
 num_classes = 2
 
@@ -36,7 +36,7 @@ model = dict(
             loss_weight=2.0,
             reduction='mean',
             # [Background, Cracks, No-Object]
-            class_weight=[1.0, 5.0, 1.0]
+            class_weight=[1.0, 2.0, 1.0]
         )
     )
 )
