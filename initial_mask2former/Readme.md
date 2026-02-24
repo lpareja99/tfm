@@ -1,22 +1,115 @@
+# Table of Contents
+1. [Experiment Dashboard](#Experiment-Dashboard)
+2. [Classes](#Classes)
+3. [Third Example](#third-example)
+4. [Fourth Example](#fourth-examplehttpwwwfourthexamplecom)
+
+
+## 📊 Experiment Dashboard
+
+| ID | Model | Data | Strategy | mIoU | Status | Date|
+| :---                                 | :---   | :---     | :---              | :---   | :---        | :--- |
+| [**01**](./docs/experiments.md#exp1) | Swin-T | 500 Img  | Balanced 17-class | 0.XX   | Done        |  |
+| [**02**](./docs/experiments.md#exp2) | Swin-T | 1500 Img | Binary Cracks     | 73.36% | Done        |  |
+|[ **03**](./docs/experiments.md#exp3) | Swin-T | 1500 Img | Binary Cracks     | 73.36% | In Progress |  |
+
+---
+
+## Classes
+| Class ID | Class Name | RGB Color Palette | Hex (Approx) |
+| :--- | :--- | :--- | :--- |
+| 0 | bg | (0, 0, 0) | #000000 |
+| 1 | cracks | (250, 50, 83) | #FA3253 |
+| 2 | cracks_alligator | (36, 179, 83) | #24B353 |
+| 3 | cracks_severe | (102, 255, 102) | #66FF66 |
+| 4 | edge_breaks | (255, 0, 255) | #FF00FF |
+| 5 | fretting | (204, 153, 51) | #CC9933 |
+| 6 | pothole | (115, 51, 128) | #733380 |
+| 7 | manhole | (34, 62, 209) | #223ED1 |
+| 8 | patched | (63, 63, 63) | #3F3F3F |
+| 9 | bad_joint | (224, 68, 45) | #E0442D |
+| 10 | joint | (255, 153, 51) | #FF9933 |
+| 11 | large_repair | (255, 255, 51) | #FFFF33 |
+| 12 | loose_stones | (51, 255, 255) | #33FFFF |
+| 13 | pole_shadow | (172, 84, 109) | #AC546D |
+| 14 | sill | (36, 223, 0) | #24DF00 |
+| 15 | tyre_mark | (170, 68, 22) | #AA4416 |
+| 16 | edge_grass | (213, 164, 25) | #D5A419 |
+
+## Start Project
+
 1. Build img `docker compose up -d --build` (~10min)
 
 2. Start container witout building `docker compose up -d`
 
 3. Access Container `docker exec -it road_defect_tfm bash`
 
-4. Train data `mim train mmseg configs/initial_test_flowity.py`
+4. Train data `mim train mmseg configs/local/initial_test_flowity.py`
 
 5. Test Data 
 ` mim test mmseg configs/initial_test_flowity.py     --checkpoint work_dirs/initial_test_flowity/checkpoints/initial_test_flowity/best_mIoU_iter_1440.pth     --show-dir work_dirs/initial_test_flowity/results`
 
+Option to only have to pass the work-directory
+`python scripts/mim_test_executer.py work_dirs/combined_cracks_augmentation`
 
+6. Organize and analyze training and test logs (after both training and testing have run successfully)
+`python scripts/master_analysis.py work_dirs/combined_cracks_augmentation`
 
-6. Loss Curve
-`mim run mmseg analyze_logs plot_curve \
-work_dirs/initial_test_flowity/20260213_112247/20260213_112247.json \
---keys loss --legend loss --out loss_curve.png`
+7. Upload the hyperparameters to tensor board
+``
+8. Download a mmsegmetation model 
+`mim download mmsegmentation --config mask2former_swin-t_8xb2-160k_ade20k-512x512 --dest ./models/`
 
-7. mIoU Curve
+---
+
+## Azure Comads
+
+1. Build img
+``` bash
+export DOCKER_BUILDKIT=1
+docker build --tag crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerSwing -f ./Dockerfile .
+```
+
+2. loging to azure 
+``` bash
+az acr login -n crflowityartifacts
+```
+
+3. Push img: 
+``` bash 
+docker push crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerSwing 
+```
+
+4. run job 
+``` bash 
+az ml job create --subscription 2dcd4ebb-39e0-451f-9dcb-9a3ec70e0299 --resource-group rg-flowityanalytics-testing --workspace-name ml-analytics-testing --file ./scripts/azure/train_job.yml
+```
+
+5. create and update db
+``` bash
+az ml data create --file scripts/azure/db_creation.yml \
+  --subscription 2dcd4ebb-39e0-451f-9dcb-9a3ec70e0299 \
+  --resource-group rg-flowityanalytics-testing \
+  --workspace-name ml-analytics-testing
+```
+
+python scripts/tsne_analysis.py \
+    work_dirs/cracks_augmentation/cracks_augmentation.py \
+    work_dirs/cracks_augmentation/checkpoints/best_mIoU_iter_5000.pth \
+    data/multi_crack \
+    work_dirs/cracks_augmentation/results/analysis
+
+tse analysis 
+
+```python
+
+python scripts/crack_tse_analysis.py \
+    work_dirs/combined_cracks_augmentation/combined_cracks_augmentation.py \
+    work_dirs/combined_cracks_augmentation/checkpoints/combined_cracks_augmentation/best_mIoU_iter_7000.pth \
+    data/combine_crack \
+    work_dirs/combined_cracks_augmentation/results/analysis
+
+```
 
 
 // test_visual -- following mmsegmentation docuemnantation: [text](https://mmsegmentation.readthedocs.io/en/latest/user_guides/visualization.html)
@@ -34,119 +127,3 @@ mim train mmseg configs/initial_test_flowity.py --work-dir work_dirs/test_visual
 tensorboard --logdir work_dirs/test_visual/vis_data/20260213_130959
 
 tensorboard --logdir work_dirs --port 6006 --bind_all
-
-
-## Experiments
-
-<details>
-<summary><h3>Exp 1: Swin-T Mask2Former - Initial 500-Image Balanced Subset</h3></summary>
-
-**Date:** 2026-02-17  
-**Config:** `configs/subset_500_flowity_bg.py`  
-**Work Dir:** `work_dirs/subset_500_flowity_bg/20260217_092814`
-
-#### 1. Hypothesis / Goal
-* **Goal:** Test if a small, balanced subset of 500 images using a greedy selection approach can provide a baseline for 17 road defect classes to reduce bias.
-* **Hypothesis:** By ensuring at least 40-67 instances per class, the model should begin to distinguish between primary defects like cracks and potholes.
-
-#### 2. Key Hyperparameters
-* **Model:** Swin-T Mask2Former (512x512).
-* **Iterations:** 15,000.
-* **Batch Size:** 2.
-* **Classes:** 17 (including background).
-* **Data Selection:** Greedy approach targeting uniform distribution; excluded IDs 14, 9, 16 (<20 instances).
-
-#### 3. Results (mIoU / Metrics)
-* **Best mIoU:** 0.XX (at iter 13500).
-* **Class Performance:** * **Failed:** Class 1 ("cracks") failed to learn entirely despite having 67 instances.
-    * **Success:** Better performance on distinct geometric shapes like "pothole".
-
-#### 4. Observations & Next Steps
-* **Observation:** The "crack" class is likely struggling due to its thin, linear nature and high intra-class variance, which 500 images cannot represent.
-</details>
-
----
-
-<details>
-<summary><h3>Exp 2: Swin-T Mask2Former - 1500 Img Subset with only cracks</h3></summary>
-
-**Date:** 2026-02-17  
-**Config:** `combined_cracks_bg.py`  
-**Work Dir:** `./work_dirs/combined_cracks_bg`
-
-#### 1. Hypothesis / Goal
-* **Goal:** Establish a robust baseline for crack segmentation using a Transformer-based architecture (Mask2Former) on only cracks merging their classes.
-
-* **Hypothesis:** If I reduce the numebr of classes and merge them into one the model would not struggle so much to learn the pattern.
-
-#### 2. Key Hyperparameters
-* **Model:** Mask2Former with Swin-Tiny backbone
-* **Iterations:** 5 Epochs
-* **Batch Size:** 2
-* **Classes:** 2 (gb, cracks)
-* **Data Selection:** 1500 img subset
-
-#### 3. Results (mIoU / Metrics)
-* **Best mIoU:** 73.36% (Final Test Result)
-* **Class Performance:** 
-    * **Failed:** Cracks achieved only 48.98% IoU
-    * **Success:** 71.31% Recall
-
-#### 4. Observations & Next Steps
-* **Observation:** model effectively identifies the presence of cracks (High Recall) but struggles with the precision of the crack boundaries, resulting in the "dotted line" effect seen in your test images.
-
-</details>
-
----
-
-<summary><h3>Exp 2: Swin-T Mask2Former - 1500 Img Subset with only cracks with augmentation techniques</h3></summary>
-
-**Date:** 2026-02-19
-
-**Config:** ``  
-
-**Work Dir:** ``
-
-
-
-#### 1. Hypothesis / Goal
-
-* **Goal:**
-
-* **Hypothesis:**
-
-
-
-#### 2. Key Hyperparameters
-
-* **Model:**
-
-* **Iterations:**
-
-* **Batch Size:**
-
-* **Classes:**
-
-* **Data Selection:**
-
-
-
-#### 3. Results (mIoU / Metrics)
-
-* **Best mIoU:**
-
-* **Class Performance:**
-
-    * **Failed:**
-
-    * **Success:**
-
-
-
-#### 4. Observations & Next Steps
-
-* **Observation:**
-
-</details>
-
-
