@@ -1,0 +1,6 @@
+# road_defect_data.yml
+$schema: https://azuremlschemas.azureedge.net/latest/data.schema.json
+name: laura_tfm_defect_data
+description: "Folder containing images, 4-class labels, and splits for MMSeg"
+type: uri_folder
+path: ../../data/2026-01-19-defect_dataset/
