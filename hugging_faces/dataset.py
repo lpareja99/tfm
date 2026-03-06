@@ -30,12 +30,15 @@ class BasicRoadDataset(Dataset):
         image = Image.open(img_path).convert("RGB")
         mask = Image.open(mask_path).convert("L") # 0: bg, 1: cracks, etc.
 
+        image_resized_for_eval = image.resize((512, 512), Image.BILINEAR)
+        mask_resized_for_eval = mask.resize((512, 512), Image.NEAREST)
         # Basic Preprocessing
         # The processor handles resizing, rescaling, and normalization
-        inputs = self.processor(image, segmentation_maps=mask, return_tensors="pt")
+        inputs = self.processor(image_resized_for_eval, segmentation_maps=mask_resized_for_eval, return_tensors="pt")
+        inputs = {k: v[0] for k, v in inputs.items()} 
+        inputs["labels"] = torch.tensor(np.array(mask_resized_for_eval), dtype=torch.long)
         
-        # Remove the batch dimension added by the processor
-        inputs = {k: v[0] for k, v in inputs.items()}       
+     
         return inputs
 
 # Replicating your training pipeline
