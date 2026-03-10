@@ -11,4 +11,4 @@ NUM_LABELS = len(ID2LABEL)
 BASE_MODEL = "facebook/mask2former-swin-tiny-ade-semantic"
 IMAGE_SIZE = {"height": 512, "width": 512}
 
-WORK_DIR = "./work_dirs/basic_round_4"
+WORK_DIR = "./work_dirs/basic_round_augmentation"
