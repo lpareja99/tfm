@@ -5,6 +5,7 @@ __pycache__/
 data/
 *.img
 *.png
+wand/*
 
 # C extensions
 *.so
@@ -211,3 +212,4 @@ __marimo__/
 .vscode/settings.json
 
 hugging_faces/work_dirs/
+hugging_faces/wandb/*

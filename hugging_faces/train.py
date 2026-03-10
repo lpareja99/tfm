@@ -117,6 +117,7 @@ trainer = Trainer(
     eval_dataset=val_dataset,
     data_collator=collate_fn,
     compute_metrics=compute_metrics_fn,
+    tokenizer=processor
     callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
 )
 
