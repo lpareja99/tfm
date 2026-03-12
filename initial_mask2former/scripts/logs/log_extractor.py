@@ -2,6 +2,7 @@ import csv
 import re
 import os
 import matplotlib.pyplot as plt
+import argparse
 
 def is_table_border(line):
     # Matches a line like +-------+-------+...
@@ -115,3 +116,35 @@ def create_plot(results, out_dir, run_name=""):
     plot_filename = f'metrics_plot_{run_name}.png' if run_name else 'metrics_plot.png'
     plt.savefig(os.path.join(out_dir, plot_filename))
     plt.close()
+    
+def main(log_dir, out_dir, train=True, test=False):
+    for log_file in os.listdir(log_dir):
+        if log_file.endswith('.log'):
+            log_path = os.path.join(log_dir, log_file)
+            run_name = os.path.splitext(log_file)[0]
+            if 'train' in log_file:
+                results = parse_training_log(log_path, out_dir, run_name)
+                create_plot(results, out_dir, run_name)
+            elif 'test' in log_file:
+                parse_testing_log(log_path, out_dir, run_name)
+                
+if __name__ == "__main__":
+
+    # 1. Set up the argument parser
+    parser = argparse.ArgumentParser(description="Parse training and testing logs.")
+    parser.add_argument("log_dir", type=str, help="Path to the folder containing your .log files")
+    parser.add_argument("out_dir", type=str, help="Path where you want to save the CSVs and plots")
+
+    # 2. Parse the arguments given in the terminal
+    args = parser.parse_args()
+
+    # 3. Create the output directory if it doesn't exist
+    if not os.path.exists(args.out_dir):
+        os.makedirs(args.out_dir)
+        print(f"Created output directory: {args.out_dir}")
+
+    # 4. Run your main function
+    print(f"Processing logs from: {args.log_dir}")
+    main(args.log_dir, args.out_dir)
+    print("Done!")
+    

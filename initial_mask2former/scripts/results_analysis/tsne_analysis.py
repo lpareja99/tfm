@@ -35,8 +35,11 @@ def get_feats(model, patches):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('config'); parser.add_argument('checkpoint')
-    parser.add_argument('data'); parser.add_argument('out')
+    parser.add_argument('config')
+    parser.add_argument('checkpoint')
+    parser.add_argument('data')
+    parser.add_argument('labels_folder')
+    parser.add_argument('out')
     args = parser.parse_args()
     
     # DYNAMIC CONFIG LOADING
@@ -45,10 +48,14 @@ if __name__ == "__main__":
     palette = cfg.palette          # e.g., [[0,0,0], [250,50,83], ...] 
     
     model = init_model(args.config, args.checkpoint, device='cuda:0')
-    img_dir, mask_dir = Path(args.data)/"images", Path(args.data)/"labels"
+    img_dir = Path(args.data)/"images"
+    mask_dir = Path(args.data)/Path(args.labels_folder)
+    
+    print(mask_dir)
     
     data = []
     for ip in list(img_dir.glob("*.jpg"))[:50]:
+        print(f"Processing {ip.name}...")
         mp = mask_dir / (ip.stem + ".png")
         if mp.exists(): data.extend(get_patches_with_ids(ip, mp))
     
