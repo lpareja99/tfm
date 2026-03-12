@@ -1,48 +1,68 @@
-_base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
+_base_ = ['mmseg::mask2former/mask2former_r50_8xb2-160k_ade20k-512x512.py']
 
-class_names = ("bg", "cracks")
+data_root =  "data/2026-01-19-defect_dataset"
+label_dir = "labels_cracks"
+log_level = 'INFO'
+work_dir = './work_dirs/HRNet_basic'
+dataset_type = 'BaseSegDataset'
 
-palette = [[0, 0, 0], [250, 50, 83]]
+class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe")
+resume = True
+
+batch_size = 2
+num_workers = 4
+max_iterations = 5000 # 750 iters * 5 epochs
+val_interval = 500
+num_classes = len(class_names)
+crop_size = (512, 512)
+
+print(f"---> Training for {max_iterations} iterations.")
+
+palette = [
+    [0, 0, 0],       # bg - Black
+    [250, 50, 83],   # cracks - Red/Pink
+    [36, 179, 83],   # cracks_alligator - Green
+    [102, 204, 255]  # cracks_severe - Light Green
+]
 
 metainfo = dict(
     classes=class_names,
     palette=palette
 )
-   
-log_level = 'INFO'
-work_dir = './work_dirs/combined_cracks_augmentation'
-
-# Iteration Logic
-dataset_type = 'BaseSegDataset'
-data_root = 'data/combine_crack'
-
-batch_size = 2
-max_iterations = 3000 # 750 iters * 5 epochs
-val_interval = 750
-num_classes = 2
-
-print(f"---> Training for {max_iterations} iterations.")
-
 
 # 1. Model Config
 model = dict(
+    type='EncoderDecoder',
+    backbone=dict(
+        type='HRNet',
+        _delete_=True,
+        norm_cfg=dict(type='BN', requires_grad=True),
+        norm_eval=False,
+        extra=dict(
+            stage1=dict(num_modules=1, num_branches=1, block='BOTTLENECK', num_blocks=(4,), num_channels=(64,)),
+            stage2=dict(num_modules=1, num_branches=2, block='BASIC', num_blocks=(4, 4), num_channels=(32, 64)),
+            stage3=dict(num_modules=4, num_branches=3, block='BASIC', num_blocks=(4, 4, 4), num_channels=(32, 64, 128)),
+            stage4=dict(num_modules=3, num_branches=4, block='BASIC', num_blocks=(4, 4, 4, 4), num_channels=(32, 64, 128, 256))
+        ),
+        init_cfg=dict(type='Pretrained', checkpoint='open-mmlab://msra/hrnetv2_w32')
+    ),
     decode_head=dict(
+        in_channels=[32, 64, 128, 256], # Default for HRNet-W32
         num_classes=num_classes, 
-        out_channels=num_classes,
+        #out_channels=num_classes,
         ignore_index=255,
         loss_cls=dict(
             type='CrossEntropyLoss',
             use_sigmoid=False,
             loss_weight=2.0,
             reduction='mean',
-            # [Background, Cracks, No-Object]
-            class_weight=[1.0, 2.0, 1.0]
-        )
+            # [Background, Cracks, Alligator, Severe]
+            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1]
+        ),
     )
 )
 
 
-# 3. Early Stopping and Hooks
 custom_hooks = [
     dict(
         type='EarlyStoppingHook',
@@ -68,9 +88,9 @@ default_hooks = dict(
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(
         type='SegVisualizationHook', 
-        draw=False,
-        interval=10)
-    
+        draw=True,
+        interval=10
+    )
 )
 
 vis_backends = [dict(type='LocalVisBackend'),
@@ -86,12 +106,11 @@ visualizer = dict(
     alpha=0.6
 )
 
-# Ensure the evaluator is present so the hook has data to monitor
 val_evaluator = dict(
     type='IoUMetric',
-    iou_metrics=['mIoU', 'mDice', 'mFscore'])
-
-
+    iou_metrics=['mIoU', 'mDice', 'mFscore'],
+    output_dir=f'{work_dir}/eval_results'
+)
 test_evaluator = val_evaluator
 
 train_pipeline = [
@@ -113,9 +132,9 @@ train_pipeline = [
     dict(type='mmcv.RandomGrayscale', prob=0.1, keep_channels=True),
     
     # Force focus on structure over color
-    dict(type='RandomCrop', crop_size=(512, 512), cat_max_ratio=0.75),
+    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
     # Rotate by up to 45 degrees to handle diagonal cracks
-    dict(type='RandomRotate', prob=0.5, degree=45, pad_val=0, seg_pad_val=0),
+    #dict(type='RandomRotate', prob=0.5, degree=10, pad_val=0, seg_pad_val=0),
     dict(type='RandomFlip', prob=0.5, direction=['horizontal', 'vertical']),
     dict(type='PackSegInputs')
 ]
@@ -129,17 +148,34 @@ test_pipeline = [
 
 train_dataloader = dict(
     batch_size=batch_size, # Safety for your 4070
-    num_workers=4,
+    num_workers=num_workers,
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
         ann_file='splits/train.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path='labels'),
+        data_prefix=dict(img_path='images', seg_map_path=label_dir),
         metainfo=metainfo,
         pipeline=train_pipeline,
-        reduce_zero_label=False))
+        reduce_zero_label=False
+    )
+)
+
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file='splits/test.txt',
+        img_suffix='.jpg',
+        seg_map_suffix='.png',
+        data_prefix=dict(img_path='images', seg_map_path=label_dir),
+        metainfo=metainfo,
+        pipeline=test_pipeline,
+        reduce_zero_label=False
+    )
+)
 
 val_dataloader = dict(
     batch_size=1,
@@ -149,12 +185,12 @@ val_dataloader = dict(
         ann_file='splits/val.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path='labels'),
+        data_prefix=dict(img_path='images', seg_map_path=label_dir),
         metainfo=metainfo,
         pipeline=test_pipeline,
-        reduce_zero_label=False))
-
-test_dataloader = val_dataloader
+        reduce_zero_label=False
+    )
+)
 
 # Running Settings
 work_dir = work_dir

@@ -3,6 +3,7 @@ data_root = None
 _base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
 
 class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe")
+resume = True
 
 palette = [
     [0, 0, 0],       # bg - Black
@@ -17,13 +18,14 @@ metainfo = dict(
 )
    
 log_level = 'INFO'
-work_dir = './work_dirs/cracks_augmentation'
+work_dir = './work_dirs/cracks_augmentation_TverskyLoss'
 
 # Iteration Logic
 dataset_type = 'BaseSegDataset'
 
 batch_size = 2
-max_iterations = 1000 # 750 iters * 5 epochs
+num_workers = 4
+max_iterations = 5000 # 750 iters * 5 epochs
 val_interval = 500
 num_classes = len(class_names)
 crop_size = (512, 512)
@@ -43,7 +45,16 @@ model = dict(
             loss_weight=2.0,
             reduction='mean',
             # [Background, Cracks, Alligator, Severe]
-            class_weight=[1.0] * num_classes + [0.1]
+            class_weight=[0.1] + [1.0] * (num_classes - 1)
+        ),
+        loss_dice=dict(
+            _delete_=True, 
+            type='TverskyLoss',    # Using built-in Tversky
+            loss_weight=5.0,       # Keep high weight to drive the shape learning
+            alpha=0.3,             # Penalty for False Positives (Red/Noise)
+            beta=0.7,              # Penalty for False Negatives (Blue/Missed) - KEY SETTING
+            smooth=1,             # Optional: Defaults to 1 (prevents division by zero)
+            ignore_index=255
         )
     )
 )
@@ -75,7 +86,7 @@ default_hooks = dict(
     sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(
         type='SegVisualizationHook', 
-        draw=False,
+        draw=True,
         interval=10)
     
 )
@@ -124,7 +135,7 @@ train_pipeline = [
     # Force focus on structure over color
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
     # Rotate by up to 45 degrees to handle diagonal cracks
-    dict(type='RandomRotate', prob=0.5, degree=10, pad_val=0, seg_pad_val=0),
+    #dict(type='RandomRotate', prob=0.5, degree=10, pad_val=0, seg_pad_val=0),
     dict(type='RandomFlip', prob=0.5, direction=['horizontal', 'vertical']),
     dict(type='PackSegInputs')
 ]
@@ -138,7 +149,7 @@ test_pipeline = [
 
 train_dataloader = dict(
     batch_size=batch_size, # Safety for your 4070
-    num_workers=4,
+    num_workers=num_workers,
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
