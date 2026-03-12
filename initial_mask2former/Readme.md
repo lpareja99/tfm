@@ -49,6 +49,17 @@
 5. Test Data 
 ` mim test mmseg configs/initial_test_flowity.py     --checkpoint work_dirs/initial_test_flowity/checkpoints/initial_test_flowity/best_mIoU_iter_1440.pth     --show-dir work_dirs/initial_test_flowity/results`
 
+``` bash 
+mim train mmseg {local_config_path} \
+  --cfg-options \
+  train_dataloader.dataset.data_root={db_path}/ \
+  val_dataloader.dataset.data_root={db_path}/ \
+  test_dataloader.dataset.data_root={db_path}/ \
+  train_dataloader.dataset.data_prefix.seg_map_path={labels_folder}/ \
+  val_dataloader.dataset.data_prefix.seg_map_path={labels_folder}/ \
+  test_dataloader.dataset.data_prefix.seg_map_path={labels_folder}
+```
+
 Option to only have to pass the work-directory
 `python scripts/mim_test_executer.py work_dirs/combined_cracks_augmentation`
 
@@ -69,6 +80,11 @@ Option to only have to pass the work-directory
 export DOCKER_BUILDKIT=1
 docker build --tag crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerSwing -f ./Dockerfile .
 ```
+
+Images:
+- mask2formerSwing 
+- mask2formerHRNet
+
 
 2. loging to azure 
 ``` bash
@@ -93,11 +109,12 @@ az ml data create --file scripts/azure/db_creation.yml \
   --workspace-name ml-analytics-testing
 ```
 
-python scripts/tsne_analysis.py \
-    work_dirs/cracks_augmentation/cracks_augmentation.py \
-    work_dirs/cracks_augmentation/checkpoints/best_mIoU_iter_5000.pth \
-    data/multi_crack \
-    work_dirs/cracks_augmentation/results/analysis
+python scripts/results_analysis/tsne_analysis.py \
+    work_dirs/azure/cracks_augmentation_24_02/cracks_augmentation.py \
+    work_dirs/azure/cracks_augmentation_24_02/checkpoints/best_mIoU_iter_11000.pth \
+    data/2026-01-19-defect_dataset \
+    labels_cracks \
+    work_dirs/azure/cracks_augmentation_24_02/results
 
 tse analysis 
 

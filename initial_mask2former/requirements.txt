@@ -6,6 +6,7 @@ tqdm
 ipywidgets
 Pillow
 scikit-learn
+ninja
 
 
 # Mask2Former Specifics

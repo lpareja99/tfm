@@ -13,7 +13,7 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
       - .:/app
-      - ./data:/app/data
+      - ../data:/app/data
     working_dir: /app
     stdin_open: true # Equivalent to -i
     tty: true
