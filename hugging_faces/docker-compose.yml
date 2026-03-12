@@ -1,0 +1,18 @@
+services:
+  hf-dev:
+    build: .
+    container_name: hf_road_defect
+    runtime: nvidia
+    ipc: host               # This is perfect! Prevents PyTorch shared-memory crashes
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - WANDB_API_KEY=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  # Uncomment and paste your key if you switch to W&B
+    volumes:
+      - .:/app
+      - ../data:/app/data
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    ports:
+      - "6007:6006" # You can leave this for Tensorboard just in case
+      - "8889:8888" # For Jupyter

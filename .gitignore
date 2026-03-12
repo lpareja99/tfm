@@ -6,6 +6,8 @@ data/
 *.img
 *.png
 
+hugging_faces/wandb/
+
 # C extensions
 *.so
 

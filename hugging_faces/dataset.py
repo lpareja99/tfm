@@ -3,14 +3,13 @@ import numpy as np
 from PIL import Image
 import torch
 from torch.utils.data import Dataset
-import albumentations as A
-from transformers import Mask2FormerImageProcessor
 
 class BasicRoadDataset(Dataset):
-    def __init__(self, data_root, label_dir, split_file, processor):
+    def __init__(self, data_root, label_dir, split_file, processor, transform=None):
         self.data_root = data_root
         self.label_dir = label_dir
         self.processor = processor
+        self.transform = transform
         
         # Load the split file
         split_path = os.path.join(data_root, 'splits', split_file)
@@ -27,32 +26,16 @@ class BasicRoadDataset(Dataset):
         img_path = os.path.join(self.data_root, 'images', f"{img_name}.jpg")
         mask_path = os.path.join(self.data_root, self.label_dir, f"{img_name}.png")
         
-        image = Image.open(img_path).convert("RGB")
-        mask = Image.open(mask_path).convert("L") # 0: bg, 1: cracks, etc.
-
-        image_resized_for_eval = image.resize((512, 512), Image.BILINEAR)
-        mask_resized_for_eval = mask.resize((512, 512), Image.NEAREST)
-        # Basic Preprocessing
-        # The processor handles resizing, rescaling, and normalization
-        inputs = self.processor(image_resized_for_eval, segmentation_maps=mask_resized_for_eval, return_tensors="pt")
-        inputs = {k: v[0] for k, v in inputs.items()} 
-        inputs["labels"] = torch.tensor(np.array(mask_resized_for_eval), dtype=torch.long)
+        image_np = np.array(Image.open(img_path).convert("RGB"))
+        mask_np = np.array(Image.open(mask_path).convert("L"))
         
-     
+        if getattr(self, "transform", None) is not None:
+            augmented = self.transform(image=image_np, mask=mask_np)
+            image_np = augmented['image']
+            mask_np = augmented['mask']
+        
+        inputs = self.processor(images=image_np, segmentation_maps=mask_np, return_tensors="pt")
+        inputs = {k: v[0] for k, v in inputs.items()}
+        inputs["labels"] = torch.tensor(mask_np, dtype=torch.long)
+             
         return inputs
-
-# Replicating your training pipeline
-'''
-train_transform = A.Compose([
-    A.RandomScale(scale_limit=(0.5, 2.0)),
-    A.RandomBrightnessContrast(p=0.5), # PhotoMetricDistortion
-    A.ToGray(p=0.1),                   # RandomGrayscale
-    A.RandomCrop(width=512, height=512), # crop_size
-    A.HorizontalFlip(p=0.5),
-    A.VerticalFlip(p=0.5)              # RandomFlip
-])
-
-val_transform = A.Compose([
-    A.Resize(height=512, width=2048)   # Keeping aspect ratio conceptually
-])
-'''

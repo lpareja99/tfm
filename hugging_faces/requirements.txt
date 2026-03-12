@@ -18,6 +18,7 @@ torch
 torchvision
 albumentations
 scikit-learn
+matplotlib
 tensorboard
 opencv-python
 setuptools
