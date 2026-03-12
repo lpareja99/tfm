@@ -55,7 +55,14 @@ model = dict(
             loss_weight=2.0,
             reduction='mean',
             # [Background, Cracks, Alligator, Severe]
-            class_weight=[0.1] + [1.0] * (num_classes - 1) #class adjustment, less weight on background 
+            class_weight=[0.1] + [1.0] * (num_classes - 1)
+        ),
+        loss_dice=dict(
+            type='TverskyLoss',    # Using built-in Tversky
+            use_sigmoid=True,      # Required for multi-class/binary in this context
+            loss_weight=5.0,       # Keep high weight to drive the shape learning
+            alpha=0.3,             # Penalty for False Positives (Red/Noise)
+            beta=0.7,              # Penalty for False Negatives (Blue/Missed) - KEY SETTING
         )
     )
 )
