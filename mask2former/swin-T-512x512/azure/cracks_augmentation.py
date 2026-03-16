@@ -12,7 +12,7 @@ resume = True
     [102, 204, 255]  # cracks_severe - Light Green
 ] """
 
-class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe", "edge_cracks", "fretting", "pothole", "manhole", "pole_shadow")
+""" class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe", "edge_cracks", "fretting", "pothole", "manhole", "pole_shadow")
 palette = [
     [0, 0, 0],       # bg - Black
     [250, 50, 83],   # cracks - Red/Pink
@@ -23,6 +23,34 @@ palette = [
     [255, 255, 0],   # pothole - Yellow
     [0, 255, 255],   # manhole - Cyan
     [255, 0, 255]    # pole_shadow - Magenta
+] """
+
+class_names = (
+    "bg", "cracks", "cracks_alligator", "cracks_severe", 
+    "edge_breaks", "fretting", "pothole", "manhole", 
+    "patched", "bad_joint", "joint", "large_repair", 
+    "loose_stones", "pole_shadow", "sill", "tyre_mark", 
+    "edge_grass"
+)
+
+palette = [
+    [0, 0, 0],         # 0: bg
+    [250, 50, 83],     # 1: cracks
+    [36, 179, 83],     # 2: cracks_alligator
+    [102, 255, 102],   # 3: cracks_severe
+    [255, 0, 255],     # 4: edge_breaks
+    [204, 153, 51],    # 5: fretting
+    [115, 51, 128],    # 6: pothole
+    [34, 62, 209],     # 7: manhole
+    [63, 63, 63],      # 8: patched
+    [224, 68, 45],     # 9: bad_joint
+    [255, 153, 51],    # 10: joint
+    [255, 255, 51],    # 11: large_repair
+    [51, 255, 255],    # 12: loose_stones
+    [172, 84, 109],    # 13: pole_shadow
+    [36, 223, 0],      # 14: sill
+    [170, 68, 22],     # 15: tyre_mark
+    [213, 164, 25]     # 16: edge_grass
 ]
 
 metainfo = dict(
@@ -63,8 +91,7 @@ model = dict(
             use_sigmoid=False,
             loss_weight=2.0,
             reduction='mean',
-            # [Background, Cracks, Alligator, Severe]
-            class_weight=[0.1] + [1.0] * (num_classes - 1) #class adjustment, less weight on background 
+            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1] #class adjustment, less weight on background 
         )
     )
 )
@@ -102,7 +129,7 @@ default_hooks = dict(
 
 visualizer = dict(
     type='SegLocalVisualizer', 
-    vis_backends=dict(type='LocalVisBackend'), 
+    vis_backends=[dict(type='LocalVisBackend')], 
     save_dir=f'{work_dir}/results',
     name='visualizer',
     alpha=0.6

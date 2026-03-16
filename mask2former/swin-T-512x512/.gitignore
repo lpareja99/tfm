@@ -1,0 +1,11 @@
+data/*
+work_dirs/*
+models/*
+
+*.pth
+*.tar.gz
+*.log
+
+.git/
+.vscode/
+mmsegmentation/

@@ -1,13 +1,9 @@
 numpy<2.0.0
-jupyterlab
 torch>=1.8.0
-ipykernel
 tqdm
-ipywidgets
 Pillow
 scikit-learn
 ninja
-
 
 # Mask2Former Specifics
 scipy

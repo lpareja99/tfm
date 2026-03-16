@@ -1,8 +1,8 @@
-# Start from a base image with CUDA and PyTorch already inside
-FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+#FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime 
 
 # Install system dependencies for OpenCV
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends\
     libgl1-mesa-glx \
     libglib2.0-0 \
     git \
@@ -10,27 +10,25 @@ RUN apt-get update && apt-get install -y \
     cmake \
     && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /app
 
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install "setuptools<70.0" "cmake>=3.25.0"
-RUN pip install --only-binary=:all: pyarrow mlflow azureml-mlflow
-
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir "setuptools<70.0" "cmake>=3.25.0"
+RUN pip install --no-cache-dir --only-binary=:all: pyarrow mlflow azureml-mlflow
 
 RUN cmake --version
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy your requirements and install them
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 
 # Install mmsegmentation directly from the source into the container
 # This way, you don't have it in your repo, but the container HAS it.
-RUN pip install openmim
+RUN pip install --no-cache-dir openmim
 RUN mim install "mmengine>=0.7.4" "mmcv==2.1.0" "mmdet>=3.0.0" "mmsegmentation>=1.2.2"
-
+RUN rm -rf /root/.cache/mim
 
 ENV TORCH_HOME=/mmsegmentation/.cache
 ENV MMENGINE_CACHE_DIR=/mmsegmentation/.cache

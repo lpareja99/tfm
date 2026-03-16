@@ -26,12 +26,12 @@ outputs:
     path: azureml://datastores/workspaceblobstore/paths/checkpoints/mask2former_swing-T_Basic_defects_March_16
     mode: rw_mount
 
-code: "../../"
+code: "../"
 
 # change this to run my training
 command: >-
-  python3 /azure/train_mask2former.py  
-  --config configs/azure/cracks_augmentation.py
+  python3 azure/train_mask2former.py  
+  --config azure/cracks_augmentation.py
   --data_root ${{inputs.input_dataset}} 
   --labels_folder ${{inputs.labels_folder}}
   --weights ${{inputs.pretrained_weights}}
