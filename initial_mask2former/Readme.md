@@ -83,6 +83,7 @@ docker build --tag crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerSwi
 
 Images:
 - mask2formerSwing 
+- mask2formerSwing_basicDefects
 - mask2formerHRNet
 
 
