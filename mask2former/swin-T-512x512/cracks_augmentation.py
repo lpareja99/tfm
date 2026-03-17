@@ -1,16 +1,15 @@
-data_root = None
+# ===========================================================================
+# EXPERIMENT 1A: Swin-T-512x512 - Crack Only CONFIG
+#
+# Note: This configuration is set for Azure, the local configuration
+#       is changed dynamically on the Makefile
+# ===========================================================================
 
-_base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
-
-#class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe")
+data_root = "/app/data/2026-01-19-defect_dataset"
+work_dir = "default"
 resume = True
 
-""" palette = [
-    [0, 0, 0],       # bg - Black
-    [250, 50, 83],   # cracks - Red/Pink
-    [36, 179, 83],   # cracks_alligator - Green
-    [102, 204, 255]  # cracks_severe - Light Green
-] """
+_base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
 
 class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe", "edge_cracks", "fretting", "pothole", "manhole", "pole_shadow")
 palette = [
@@ -31,9 +30,6 @@ metainfo = dict(
 )
    
 log_level = 'INFO'
-work_dir = './work_dirs/cracks_augmentation'
-
-# Iteration Logic
 dataset_type = 'BaseSegDataset'
 
 img_num = 5000
@@ -50,7 +46,6 @@ max_iterations = int(iter_per_epoch * epochs)
 crop_size = (512, 512)
 
 print(f"---> Training for {max_iterations} iterations.")
-
 
 # 1. Model Config
 model = dict(

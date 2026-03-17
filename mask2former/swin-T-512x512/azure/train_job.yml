@@ -30,7 +30,7 @@ code: "../"
 
 # change this to run my training
 command: >-
-  python3 azure/train_mask2former.py  
+  python3 train_mask2former.py  
   --config azure/cracks_augmentation.py
   --data_root ${{inputs.input_dataset}} 
   --labels_folder ${{inputs.labels_folder}}
