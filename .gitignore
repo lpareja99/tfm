@@ -7,7 +7,7 @@ data/
 *.png
 wand/*
 
-hugging_faces/wandb/
+hugging_faces_trial/wandb/*
 initial_mask2former/.Trash-0/
 
 # C extensions
@@ -216,3 +216,5 @@ __marimo__/
 
 hugging_faces/work_dirs/
 hugging_faces/wandb/*
+initial_mask2former/scripts/results_analysis (2).zip
+.gitignore
