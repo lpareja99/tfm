@@ -1,0 +1,42 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+# name: train_yaml
+
+display_name: swing_tiny_focal_loss
+experiment_name: mask2former_parent_child_experiments
+description: classes relabeld to not have to include null clases
+
+# invoke completions (Ctrl+Space, Cmd+Space) to see the list of computes available
+compute: azureml:MODELTRAINING
+# This defines the input data to mount. The names of the items in inputs can be referenced in the command
+inputs:
+  input_dataset:
+    type: uri_folder
+    path: azureml:laura_tfm_defect_data@latest #(latest = v6)
+    mode: ro_mount
+  pretrained_weights:
+    type: uri_file
+    path: azureml:mask2former_swin_tiny_512x512_base_model@latest
+    mode: ro_mount
+  labels_folder: "labels_basic_defects_relabel"
+
+
+outputs:
+  output_path:
+    type: uri_folder
+    path: azureml://datastores/workspaceblobstore/paths/checkpoints/paret_child_experiments/swin_tiny_512x512
+    mode: rw_mount
+
+code: "../"
+
+# change this to run my training
+command: >-
+  python3 azure/train_mask2former.py  
+  --config config_focal_loss.py
+  --data_root ${{inputs.input_dataset}} 
+  --labels_folder ${{inputs.labels_folder}}
+  --weights ${{inputs.pretrained_weights}}
+  --work_dir ${{outputs.output_path}}
+
+
+environment:
+  image: crflowityartifacts.azurecr.io/roadai/laura_tfm:swin_t_child
