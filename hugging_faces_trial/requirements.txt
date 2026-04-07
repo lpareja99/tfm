@@ -1,0 +1,27 @@
+numpy<2.0.0 
+
+# 2. Data & Build Tools 
+cmake>=3.25.0
+pyarrow>=16.0.0
+pandas>=2.2.0
+
+# 3. Hugging Face Stack
+transformers
+datasets
+evaluate
+spicy
+accelerate
+albumentations
+
+# 4. Computer Vision & Training Utils
+torch
+torchvision
+albumentations
+scikit-learn
+matplotlib
+tensorboard
+opencv-python
+setuptools
+psutil
+wandb
+weave

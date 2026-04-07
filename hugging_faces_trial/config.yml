@@ -1,0 +1,30 @@
+# config.py
+
+# ---------------------------------------------------------
+# 1. RUTAS DE DATOS (Data Paths)
+# ---------------------------------------------------------
+DATA_ROOT = 'data/2026-01-19-defect_dataset'
+LABEL_DIR = 'labels_cracks'
+TRAIN_SPLIT = 'train.txt'
+VAL_SPLIT = 'val.txt'
+TEST_SPLIT = 'test.txt'
+
+# ---------------------------------------------------------
+# 2. CONFIGURACIÓN DE ETIQUETAS (Labels)
+# ---------------------------------------------------------
+ID2LABEL = {0: "bg", 1: "cracks", 2: "cracks_alligator", 3: "cracks_severe"}
+LABEL2ID = {v: k for k, v in ID2LABEL.items()}
+NUM_LABELS = len(ID2LABEL)
+
+# ---------------------------------------------------------
+# 3. CONFIGURACIÓN DEL MODELO BASE (Model Settings)
+# ---------------------------------------------------------
+BASE_MODEL = "facebook/mask2former-swin-tiny-ade-semantic"
+IMAGE_SIZE = {"height": 512, "width": 512}
+
+# ---------------------------------------------------------
+# 4. RUTAS DE TRABAJO (Work Directories)
+# ---------------------------------------------------------
+# Puedes definir el directorio base aquí, aunque el checkpoint exacto 
+# es mejor pasarlo como parámetro o definirlo en el propio script de test
+WORK_DIR_BASE = "./work_dirs/basic_round_4"
