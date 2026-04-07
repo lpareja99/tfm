@@ -1,0 +1,30 @@
+numpy<2.0.0
+jupyterlab
+torch>=1.8.0
+ipykernel
+tqdm
+ipywidgets
+Pillow
+scikit-learn
+ninja
+
+
+# Mask2Former Specifics
+scipy
+ftfy
+regex
+
+# Visualization & Utils
+matplotlib
+opencv-python
+seaborn
+tensorboardX
+future 
+tensorboard
+
+# Azure ML SDK
+mlflow 
+azureml-mlflow
+azureml-core
+azure-ai-ml
+azure-identity
