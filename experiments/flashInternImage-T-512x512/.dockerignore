@@ -1,0 +1,13 @@
+data
+work_dirs
+models
+work_dir
+*.pth
+*.tar.gz
+*.log
+*.zip
+.git
+.vscode
+mmsegmentation
+**/output/*
+

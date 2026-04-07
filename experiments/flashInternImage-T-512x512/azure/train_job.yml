@@ -1,0 +1,41 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+# name: train_yaml
+
+display_name: mask2former_Flash_Inter_Image_March_30_v2
+experiment_name: mask2former_tfm_train
+description: classes relabeld to not have to include null clases
+
+compute: azureml:MODELTRAINING
+
+inputs:
+  input_dataset:
+    type: uri_folder
+    path: azureml:laura_tfm_defect_data@latest
+    mode: ro_mount
+  backbone_weights:
+    type: uri_file
+    path: azureml:laura_tfm_flash_intern_image_base_model@latest
+    mode: ro_mount
+  labels_folder: "labels_basic_defects_relabel"
+
+
+outputs:
+  output_path:
+    type: uri_folder
+    path: azureml://datastores/workspaceblobstore/paths/checkpoints/mask2former_Flash_InterImage_fixed
+    mode: rw_mount
+
+code: "../"
+
+command: >-
+  export PYTHONPATH=$PYTHONPATH:$(pwd) &&
+  python3 azure/train_mask2former.py  
+  --config config.py
+  --data_root ${{inputs.input_dataset}} 
+  --labels_folder ${{inputs.labels_folder}}
+  --backbone_weights ${{inputs.backbone_weights}}
+  --work_dir ${{outputs.output_path}}
+
+
+environment:
+  image: crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerFlashInternImage
