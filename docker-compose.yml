@@ -1,0 +1,97 @@
+services:
+  mmseg-dev:
+    build: .
+    image: road_defect_base:latest
+    container_name: road_defect_tfm_main
+    runtime: nvidia # Enables GPU access
+    ipc: host
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    working_dir: /app
+    stdin_open: true # Equivalent to -i
+    tty: true
+
+  jupyter:
+    build: .
+    image: road_defect_base:latest
+    container_name: jupyter_main
+    depends_on:
+      - mmseg-dev
+    runtime: nvidia
+    ipc: host
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    working_dir: /app
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''
+ 
+
+  # ===================================================================================================
+  #                        CHILDREN (EXPERIMENTS)
+  #
+  #  Example execution: docker compose run --rm <container_name> bash
+  # =====================================================================================================
+  
+  swin-experiment:
+    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:swin_t_child
+    build:
+      context: .
+      dockerfile: experiments/swin-T-512x512/Dockerfile
+    container_name: swin-experiment
+    shm_size: '8gb'
+    runtime: nvidia
+    volumes:           
+      - ./data:/app/data     
+    working_dir: /app
+
+  hrnet-experiment:
+    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:hrnet_t_child
+    build:
+      context: .
+      dockerfile: experiments/HRNet-T-512x512/Dockerfile
+    container_name: hrnet-experiment
+    runtime: nvidia
+    volumes:
+      - ./data:/app/data 
+    working_dir: /app
+
+  intern-experiment:
+    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:interimage_t_child
+    build:
+      context: .
+      dockerfile: experiments/InterImage-T-512x512/Dockerfile
+    container_name: intern-experiment
+    runtime: nvidia
+    volumes:
+      - ./data:/app/data
+    working_dir: /app
+
+  flash-intern-experiment:
+    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:flashinterimage_t_child
+    build:
+      context: .
+      dockerfile: experiments/flashInternImage-T-512x512/Dockerfile
+    container_name: flash-intern-experiment
+    runtime: nvidia
+    volumes:
+      - ./data:/app/data
+    working_dir: /app
+
+  beit2-experiment:
+    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:beit2_b_child
+    build:
+      context: .
+      dockerfile: experiments/beit2-T-512x512/Dockerfile
+    container_name: beit2-experiment
+    runtime: nvidia
+    volumes:
+      - ./data:/app/data
+    working_dir: /app
+  

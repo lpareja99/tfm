@@ -1,0 +1,28 @@
+# Git & IDE
+.git/
+.vscode/
+**/output/
+**/.ipynb_checkpoints/
+**/__pycache__/
+**/*.pyc
+
+# Python & Environments
+__pycache__/
+venv/
+*.pyc
+
+# Data & Outputs
+**/data/
+**/datasets/
+**/images/
+**/work_dirs/
+**/work_dir/
+**/mmsegmentation/
+**/hugging_faces_trial/
+
+# Large Artifacts & Logs
+*.zip
+*.pth
+*.tar.gz
+*.mp4
+*.log
