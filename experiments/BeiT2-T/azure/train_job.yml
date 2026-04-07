@@ -15,7 +15,8 @@ inputs:
     mode: ro_mount
   pretrained_weights:
     type: uri_file
-    path: azureml:mask2former_swin_tiny_512x512_base_model@latest
+    path: azureml:laura_tfm_beit_v2__base_pretrain_weights@latest
+    #path: azureml:laura_tfm_beit_v2_large_pretrain_weights@latest
     mode: ro_mount
   labels_folder: "labels_basic_defects_relabel"
 
@@ -23,7 +24,7 @@ inputs:
 outputs:
   output_path:
     type: uri_folder
-    path: azureml://datastores/workspaceblobstore/paths/checkpoints/mask2former_beit2_tiny
+    path: azureml://datastores/workspaceblobstore/paths/checkpoints/paret_child_experiments/beit2_base
     mode: rw_mount
 
 code: "../"
@@ -39,4 +40,4 @@ command: >-
 
 
 environment:
-  image: crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerBeit2 
+  image: crflowityartifacts.azurecr.io/roadai/laura_tfm:beit2_b_child
