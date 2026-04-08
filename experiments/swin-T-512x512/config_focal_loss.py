@@ -56,8 +56,8 @@ model = dict(
             type='FocalLoss', # Change from CrossEntropyLoss
             use_sigmoid=True,  # FocalLoss in MMcv requires sigmoid
             gamma=2.0,        # Focusing parameter
-            alpha=0.25,       # Balancing parameter
-            loss_weight=2.0,   # Matches the original Mask2Former weight
+            alpha=0.85,       # Balancing parameter
+            loss_weight=4.0,   # Matches the original Mask2Former weight
             class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1] #class adjustment, less weight on background
         ),
         train_cfg=dict(

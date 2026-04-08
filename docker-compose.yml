@@ -48,7 +48,8 @@ services:
     shm_size: '8gb'
     runtime: nvidia
     volumes:           
-      - ./data:/app/data     
+      - ./data:/app/data  
+      - ./experiments/Swin-T-512x512:/app   
     working_dir: /app
 
   hrnet-experiment:
@@ -60,6 +61,7 @@ services:
     runtime: nvidia
     volumes:
       - ./data:/app/data 
+      - ./experiments/HRNet-T-512x512:/app
     working_dir: /app
 
   intern-experiment:
@@ -71,6 +73,7 @@ services:
     runtime: nvidia
     volumes:
       - ./data:/app/data
+      - ./experiments/InterImage-T-512x512:/app
     working_dir: /app
 
   flash-intern-experiment:
@@ -82,16 +85,18 @@ services:
     runtime: nvidia
     volumes:
       - ./data:/app/data
+      - ./experiments/flashInternImage-T-512x512:/app
     working_dir: /app
 
   beit2-experiment:
     image: crflowityartifacts.azurecr.io/roadai/laura_tfm:beit2_b_child
     build:
       context: .
-      dockerfile: experiments/beit2-T-512x512/Dockerfile
+      dockerfile: experiments/BeiT2-T/Dockerfile
     container_name: beit2-experiment
     runtime: nvidia
     volumes:
       - ./data:/app/data
+      - ./experiments/BeiT2-T:/app
     working_dir: /app
   

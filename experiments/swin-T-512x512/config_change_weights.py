@@ -57,7 +57,7 @@ model = dict(
             use_sigmoid=False,
             loss_weight=2.0,
             reduction='mean',
-            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1] #class adjustment, less weight on background 
+            class_weight=[1.0, 10.5176, 7.1154, 22.0909, 51.8898, 7.8277, 33.5274, 51.0165, 68.9769, 1.0]
         )
     )
 )

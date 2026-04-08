@@ -1,8 +1,8 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 # name: train_yaml
 
-display_name: mask2former_beit2_tiny
-experiment_name: mask2former_tfm_train
+display_name: mask2former_beit2_tiny_base
+experiment_name: mask2former_parent_child_experiments
 description: classes relabeld to not have to include null clases
 
 # invoke completions (Ctrl+Space, Cmd+Space) to see the list of computes available
@@ -15,7 +15,7 @@ inputs:
     mode: ro_mount
   pretrained_weights:
     type: uri_file
-    path: azureml:laura_tfm_beit_v2__base_pretrain_weights@latest
+    path: azureml:laura_tfm_beit_v2_base_mmseg_transformed_weights@latest
     #path: azureml:laura_tfm_beit_v2_large_pretrain_weights@latest
     mode: ro_mount
   labels_folder: "labels_basic_defects_relabel"
