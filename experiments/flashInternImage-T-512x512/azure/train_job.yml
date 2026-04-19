@@ -1,8 +1,8 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 # name: train_yaml
 
-display_name: mask2former_Flash_Inter_Image_March_30_v2
-experiment_name: mask2former_tfm_train
+display_name: flsh_intern_image_b_final
+experiment_name: mask2former_parent_child_experiments
 description: classes relabeld to not have to include null clases
 
 compute: azureml:MODELTRAINING
@@ -14,7 +14,7 @@ inputs:
     mode: ro_mount
   backbone_weights:
     type: uri_file
-    path: azureml:laura_tfm_flash_intern_image_base_model@latest
+    path: azureml:laura_tfm_flash_intern_image_bigger_model@latest
     mode: ro_mount
   labels_folder: "labels_basic_defects_relabel"
 
@@ -22,7 +22,7 @@ inputs:
 outputs:
   output_path:
     type: uri_folder
-    path: azureml://datastores/workspaceblobstore/paths/checkpoints/mask2former_Flash_InterImage_fixed
+    path: azureml://datastores/workspaceblobstore/paths/checkpoints/final/flash_intern_image_b
     mode: rw_mount
 
 code: "../"
@@ -30,7 +30,7 @@ code: "../"
 command: >-
   export PYTHONPATH=$PYTHONPATH:$(pwd) &&
   python3 azure/train_mask2former.py  
-  --config config.py
+  --config config_base.py
   --data_root ${{inputs.input_dataset}} 
   --labels_folder ${{inputs.labels_folder}}
   --backbone_weights ${{inputs.backbone_weights}}

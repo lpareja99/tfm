@@ -41,6 +41,13 @@ services:
   
   swin-experiment:
     image: crflowityartifacts.azurecr.io/roadai/laura_tfm:swin_t_child
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     build:
       context: .
       dockerfile: experiments/swin-T-512x512/Dockerfile
@@ -49,11 +56,19 @@ services:
     runtime: nvidia
     volumes:           
       - ./data:/app/data  
-      - ./experiments/Swin-T-512x512:/app   
+      - ./experiments/swin-T-512x512:/app   
     working_dir: /app
 
   hrnet-experiment:
     image: crflowityartifacts.azurecr.io/roadai/laura_tfm:hrnet_t_child
+    shm_size: '8gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     build:
       context: .
       dockerfile: experiments/HRNet-T-512x512/Dockerfile
@@ -66,11 +81,21 @@ services:
 
   intern-experiment:
     image: crflowityartifacts.azurecr.io/roadai/laura_tfm:interimage_t_child
+    shm_size: '8gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     build:
       context: .
       dockerfile: experiments/InterImage-T-512x512/Dockerfile
     container_name: intern-experiment
     runtime: nvidia
+    environment:
+      - PYTHONPATH=/app
     volumes:
       - ./data:/app/data
       - ./experiments/InterImage-T-512x512:/app
@@ -78,11 +103,21 @@ services:
 
   flash-intern-experiment:
     image: crflowityartifacts.azurecr.io/roadai/laura_tfm:flashinterimage_t_child
+    shm_size: '8gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     build:
       context: .
       dockerfile: experiments/flashInternImage-T-512x512/Dockerfile
     container_name: flash-intern-experiment
     runtime: nvidia
+    environment:
+      - PYTHONPATH=/app
     volumes:
       - ./data:/app/data
       - ./experiments/flashInternImage-T-512x512:/app
@@ -90,6 +125,14 @@ services:
 
   beit2-experiment:
     image: crflowityartifacts.azurecr.io/roadai/laura_tfm:beit2_b_child
+    shm_size: '8gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     build:
       context: .
       dockerfile: experiments/BeiT2-T/Dockerfile

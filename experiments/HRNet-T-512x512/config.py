@@ -1,6 +1,6 @@
 _base_ = ['mmseg::mask2former/mask2former_r50_8xb2-160k_ade20k-512x512.py']
 
-data_root =  None
+data_root =  "data/2026-01-19-defect_dataset/"
 label_dir = "labels_cracks"
 log_level = 'INFO'
 work_dir = None
@@ -81,7 +81,7 @@ custom_hooks = [
         monitor='mIoU',      # Metric to monitor
         rule='greater',      # Stop if mIoU stops increasing
         min_delta=0.003,     # Minimum change to count as an improvement
-        patience=4,          # Number of validations to wait
+        patience=5,          # Number of validations to wait
     )
 ]
 

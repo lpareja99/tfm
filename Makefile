@@ -15,7 +15,7 @@ include runs/$(var_$(EXP))
 # general
 # =============
 jobs = ["purple_wing_zf84jm3h37", "patient_bulb_h67htrw5yd"]
-jobs2 =  clever_train_6k77vt5d01 cool_quince_65rt4g50qw
+jobs2 = zen_rice_94w4vl9xbk
 output_dir ?= "./data/laura_tfm_sun_22_dry_flowity_pipeline/"
 input_dir ?= "./data/laura_tfm_dry_annotated/test_annotation_output"
 tfm_data_output ?= "./data/final_test_dataset/"
@@ -76,6 +76,19 @@ train-azure:
 		--workspace-name ml-analytics-testing
 
 
+test-local:
+	mim test mmseg $(CONFIG_FILE) \
+		--checkpoint $(CHECKPOINT_PATH) \
+		--work-dir $(WORK_DIR) \
+		--cfg-options \
+		data_root=$(LOCAL_DATA) \
+		test_dataloader.dataset.data_root=$(LOCAL_DATA) \
+		test_dataloader.dataset.data_prefix.seg_map_path=$(LABEL) \
+		test_dataloader.dataset.metainfo.classes="$(CLASSES)" \
+		test_dataloader.dataset.metainfo.palette="$(COLORS)" \
+		test_evaluator.output_dir=$(WORK_DIR)/test_results \
+		visualizer.save_dir=$(WORK_DIR)/test_visuals
+
 # ==========================================
 # test
 # ==========================================
@@ -85,4 +98,10 @@ test:
 		--data-root $(LOCAL_DATA) \
 		--label-dir $(LABEL)
 
+
+mim test mmseg config_tiny.py \
+    --checkpoint output/best_mIoU_iter_28000_flash.pth \
+    --show-dir output/test_visuals \
+    --cfg-options \
+    test_dataloader.dataset.data_prefix.seg_map_path=labels_basic_defects_relabel
 

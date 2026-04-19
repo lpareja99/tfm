@@ -24,7 +24,7 @@ cmd_parts = [
     f"default_hooks.checkpoint.out_dir={args.work_dir}/checkpoints",
     f"val_evaluator.output_dir='{args.work_dir}/eval_results'",
     f"test_evaluator.output_dir='{args.work_dir}/eval_results'",
-    f"load_from={args.weights}",
+    f"model.backbone.init_cfg.checkpoint={args.weights}",
 ]
 
 train_cmd = " ".join(cmd_parts)

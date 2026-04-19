@@ -84,8 +84,8 @@ custom_hooks = [
         type='EarlyStoppingHook',
         monitor='mIoU',      # Metric to monitor
         rule='greater',      # Stop if mIoU stops increasing
-        min_delta=0.005,     # Minimum change to count as an improvement
-        patience=3,          # Number of validations to wait
+        min_delta=0.003,     # Minimum change to count as an improvement
+        patience=5,          # Number of validations to wait
     )
 ]
 

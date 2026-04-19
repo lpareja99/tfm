@@ -8,9 +8,9 @@ FROM crflowityartifacts.azurecr.io/roadai/laura_tfm:base_img
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . . 
 COPY Makefile .
 COPY runs/ ./runs/
+COPY experiments/flashInternImage-T-512x512/ .
 
 WORKDIR /app/custom_modules/ops_dcnv4
 

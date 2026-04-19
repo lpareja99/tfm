@@ -48,7 +48,33 @@ print(f"---> Training for {max_iterations} iterations.")
 
 # 1. Model Config
 model = dict(
+    backbone=dict(
+        _delete_=True,               # Deletes the inherited Swin-T backbone
+        type='BEiT',                 # BEiT v2 uses the standard BEiT architecture 
+        img_size=crop_size,
+        patch_size=16,
+        embed_dims=768,              # Use 768 for BEiT-Base, 1024 for BEiT-Large
+        num_layers=12,               # Use 12 for BEiT-Base, 24 for BEiT-Large
+        num_heads=12,                # Use 12 for BEiT-Base, 16 for BEiT-Large
+        mlp_ratio=4,
+        out_indices=(3, 5, 7, 11),   # Extract features from these specific layers
+        qv_bias=True,
+        attn_drop_rate=0.0,
+        drop_path_rate=0.1,
+        norm_cfg=dict(type='LN', eps=1e-6),
+        act_cfg=dict(type='GELU'),
+        norm_eval=False,
+        init_values=0.1,
+        init_cfg=dict(type='Pretrained', checkpoint='./custom_modules/models/beitv2_base_patch16_224_pt1k.pth')
+    ),
+    neck=dict(
+        type='MultiLevelNeck',
+        in_channels=[768, 768, 768, 768], # Must match the embed_dims from backbone
+        out_channels=256,
+        scales=[4, 2, 1, 0.5]             # Rescales plain ViT features into a pyramid (1/4, 1/8, 1/16, 1/32)
+    ),
     decode_head=dict(
+        in_channels=[256, 256, 256, 256], # Must match the neck's out_channels
         num_classes=num_classes, 
         out_channels=num_classes,
         ignore_index=255,
@@ -57,9 +83,14 @@ model = dict(
             use_sigmoid=False,
             loss_weight=2.0,
             reduction='mean',
-            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1] #class adjustment, less weight on background 
+            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1] 
         )
-    )
+    ),
+    test_cfg=dict(
+        mode='slide', 
+        crop_size=(512, 512),  
+        stride=(341, 341) 
+    )     
 )
 
 # 3. Early Stopping and Hooks
@@ -69,7 +100,7 @@ custom_hooks = [
         monitor='mIoU',      # Metric to monitor
         rule='greater',      # Stop if mIoU stops increasing
         min_delta=0.003,     # Minimum change to count as an improvement
-        patience=5,          # Number of validations to wait
+        patience=4,          # Number of validations to wait
     )
 ]
 
@@ -115,11 +146,11 @@ albu_train_transforms = [
         type='OneOf',
         transforms=[
             # Blur limit defines kernel sizes (must be odd). 
-            dict(type='GaussianBlur', blur_limit=(1, 3), p=1.0),
+            dict(type='GaussianBlur', blur_limit=(3, 5), p=1.0),
             # Variance limit controls the severity of the noise.
-            dict(type='GaussNoise', var_limit=(5.0, 30.0), p=1.0),
+            dict(type='GaussNoise', var_limit=(10.0, 50.0), p=1.0),
         ],
-        p=0.3  # 30% chance to apply either Blur or Noise. 70% chance to do nothing (Identity).
+        p=0.5  # 50% chance to apply either Blur or Noise. 50% chance to do nothing (Identity).
     )
 ]
 
@@ -127,21 +158,8 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', reduce_zero_label=False), # Crucial fix
     dict(type='RandomResize', scale=(2048, 512), ratio_range=(0.5, 2.0), keep_ratio=True),
-    
-    # Investigate if I should add this or keep what I currently have 
-    
-    # dict(type='RandomResize', 
-    #      scale=(1280, 720), 
-    #      ratio_range=(0.5, 2.0), # Wider range to simulate GoPro vs Phone
-    #      keep_ratio=True), # MANDATORY to prevent defect distortion
-    
-    # # Pad to the largest possible size your hardware produces (e.g., 720p)
-    # # This makes the "different sizes" uniform for the GPU tensors
-    # dict(type='Pad', size=(1280, 720), pad_val=dict(img=(0, 0, 0), mask=0)),
-    
-    
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
-
+    
     dict(
         type='Albu',
         transforms=albu_train_transforms,
@@ -159,6 +177,7 @@ train_pipeline = [
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', scale=(2048, 512), keep_ratio=True),
+    dict(type='Pad', size_divisor=512),
     dict(type='LoadAnnotations', reduce_zero_label=False),
     dict(type='PackSegInputs')
 ]

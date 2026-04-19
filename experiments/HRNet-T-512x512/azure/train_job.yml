@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 # name: train_yaml
 
-display_name: hrnet_t_9_classes
+display_name: hrnet_t_final
 experiment_name: mask2former_parent_child_experiments
 description: Train defect model for 19-02-26 dataset with augmentation with crack classes (not joined)and pretrained weights from the base model
 
@@ -27,7 +27,7 @@ inputs:
 outputs:
   output_path:
     type: uri_folder
-    path: azureml://datastores/workspaceblobstore/paths/checkpoints/paret_child_experiments/hrnet_t_512x512
+    path: azureml://datastores/workspaceblobstore/paths/checkpoints/final/hrnet_t
     mode: rw_mount
 
 code: "../"

@@ -14,4 +14,6 @@ COPY experiments/BeiT2-T/ .
 COPY experiments/BeiT2-T/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN pip install "scipy<1.14.0"
+
 CMD ["bash"]

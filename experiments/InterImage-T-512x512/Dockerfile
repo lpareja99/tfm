@@ -1,32 +1,16 @@
-FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+# docker build -t interimage-t -f ./experiments/InterImage-T/Dockerfile .
 
-RUN apt-get update && apt-get install -y --no-install-recommends\
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    git \
-    build-essential \
-    cmake \
-    wget \
-    unzip \
+# To run the container locally (run at root level):
+# $ docker compose run --rm interimage-t bash
+
+FROM crflowityartifacts.azurecr.io/roadai/laura_tfm:base_img
+
+RUN apt-get update && apt-get install -y --no-install-recommends unzip wget \
     && rm -rf /var/lib/apt/lists/* 
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir "setuptools<70.0" "cmake>=3.25.0"
-RUN pip install --no-cache-dir --only-binary=:all: pyarrow mlflow azureml-mlflow
-
-RUN cmake --version
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-RUN pip install --no-cache-dir openmim
-RUN mim install "mmengine>=0.7.4" "mmcv==2.1.0" "mmdet>=3.0.0" "mmsegmentation>=1.2.2"
-RUN rm -rf /root/.cache/mim
-
+# 1. Compile DCNv3 FIRST so Docker caches this heavy step
 RUN mkdir -p /app/custom_modules && \
     wget https://github.com/OpenGVLab/InternImage/archive/refs/heads/master.zip -O master.zip && \
     unzip master.zip "InternImage-master/segmentation/ops_dcnv3/*" -d /app/custom_modules/ && \
@@ -44,18 +28,18 @@ torch.cuda.is_available = mock_is_available" > mock_cuda.py && \
     sed -i '1i import mock_cuda' setup.py
 
 ENV FORCE_CUDA="1"
-
-# Local RTX 4070 = 8.6
-# Azure A100 GPU = 8.0
-# Azure V100 = 7.0
-# Other used ones = 7.5
 ENV TORCH_CUDA_ARCH_LIST="7.0;7.5;8.0;8.6"
 ENV MAX_JOBS=4
 RUN sh make.sh
 
-ENV TORCH_HOME=/mmsegmentation/.cache
-ENV MMENGINE_CACHE_DIR=/mmsegmentation/.cache
+# 2. Go back to main directory
+WORKDIR /app
 
-COPY . .
+# 3. Copy specific experimental files LAST
+# This guarantees that tweaking your scripts won't trigger a C++ compilation
+COPY Makefile .
+COPY runs/ ./runs/
+COPY experiments/InterImage-T-512x512/ .
+
 
 CMD ["bash"]

@@ -85,7 +85,8 @@ model = dict(
             reduction='mean',
             class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1] 
         )
-    )
+    ),
+    test_cfg=dict(mode='whole')
 )
 
 # 3. Early Stopping and Hooks
@@ -95,7 +96,7 @@ custom_hooks = [
         monitor='mIoU',      # Metric to monitor
         rule='greater',      # Stop if mIoU stops increasing
         min_delta=0.003,     # Minimum change to count as an improvement
-        patience=4,          # Number of validations to wait
+        patience=5,          # Number of validations to wait
     )
 ]
 
@@ -153,9 +154,8 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', reduce_zero_label=False), # Crucial fix
     dict(type='RandomResize', scale=(2048, 512), ratio_range=(0.5, 2.0), keep_ratio=True),
-    
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
-
+    
     dict(
         type='Albu',
         transforms=albu_train_transforms,
@@ -172,7 +172,8 @@ train_pipeline = [
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=(2048, 512), keep_ratio=True),
+    dict(type='Resize', scale=(512, 512), keep_ratio=False),
+    dict(type='Pad', size_divisor=32),
     dict(type='LoadAnnotations', reduce_zero_label=False),
     dict(type='PackSegInputs')
 ]

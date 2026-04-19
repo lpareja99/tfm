@@ -46,6 +46,11 @@ crop_size = (512, 512)
 
 print(f"---> Training for {max_iterations} iterations.")
 
+custom_imports = dict(
+    imports=['mmdet.models', 'mmdet.datasets'], 
+    allow_failed_imports=False
+)
+
 # 1. Model Config
 model = dict(
     decode_head=dict(
@@ -57,7 +62,22 @@ model = dict(
             use_sigmoid=False,
             loss_weight=2.0,
             reduction='mean',
-            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1] #class adjustment, less weight on background 
+            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.05] #class adjustment, less weight on background 
+        ),
+        loss_dice=dict(
+            type='mmdet.DiceLoss',
+            use_sigmoid=True,
+            activate=True,
+            eps=1.0,
+            naive_dice=True,
+            reduction='mean',
+            loss_weight=8.0
+        ),
+        loss_mask=dict(
+            type='mmdet.CrossEntropyLoss',
+            use_sigmoid=True,
+            reduction='mean',
+            loss_weight=8.0
         )
     )
 )
@@ -69,7 +89,7 @@ custom_hooks = [
         monitor='mIoU',      # Metric to monitor
         rule='greater',      # Stop if mIoU stops increasing
         min_delta=0.003,     # Minimum change to count as an improvement
-        patience=5,          # Number of validations to wait
+        patience=10,          # Number of validations to wait
     )
 ]
 
@@ -81,7 +101,7 @@ default_hooks = dict(
         type='CheckpointHook', 
         by_epoch=False, 
         interval=val_interval, 
-        max_keep_ckpts=3, 
+        max_keep_ckpts=5, 
         save_best='mIoU',
         out_dir=f'{work_dir}/checkpoints',
     ),
@@ -126,7 +146,7 @@ albu_train_transforms = [
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', reduce_zero_label=False), # Crucial fix
-    dict(type='RandomResize', scale=(2048, 512), ratio_range=(0.5, 2.0), keep_ratio=True),
+    dict(type='RandomResize', scale=(2048, 896), ratio_range=(0.5, 2.0), keep_ratio=True),
     
     # Investigate if I should add this or keep what I currently have 
     
@@ -166,6 +186,7 @@ test_pipeline = [
 train_dataloader = dict(
     batch_size=batch_size,
     num_workers=num_workers,
+    sampler=dict(type='InfiniteSampler', shuffle=True),
     dataset=dict(
         type=dataset_type,
         data_root=data_root,

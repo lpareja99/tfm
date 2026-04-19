@@ -26,6 +26,7 @@ WORKDIR /app
 # This way, you don't have it in your repo, but the container HAS it.
 RUN pip install openmim
 RUN mim install "mmengine>=0.7.4" "mmcv==2.1.0" "mmdet>=3.0.0" "mmsegmentation>=1.2.2"
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 ENV TORCH_HOME=/mmsegmentation/.cache
 ENV MMENGINE_CACHE_DIR=/mmsegmentation/.cache
