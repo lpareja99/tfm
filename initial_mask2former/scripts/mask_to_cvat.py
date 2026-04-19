@@ -118,7 +118,7 @@ if __name__ == "__main__":
     
     for folder in clean_folders:
         # Construct the path inside your data folder
-        base_path = "data/laura_tfm_sun_22_dry" 
+        base_path = "data/goPro_defect_recordings/wet/1_flowity_pipeline/"
         target_dir = os.path.join(base_path, folder)
         
         print(f"\n--- Starting processing for: {target_dir} ---")

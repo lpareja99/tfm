@@ -104,6 +104,8 @@ services:
   flash-intern-experiment:
     image: crflowityartifacts.azurecr.io/roadai/laura_tfm:flashinterimage_t_child
     shm_size: '8gb'
+    ports:
+      - "6006:6006"
     deploy:
       resources:
         reservations:

@@ -58,16 +58,13 @@ def main():
     if args.job_id:
         job_ids = [args.job_id]
     else:
-        job_ids = ["purple_wing_zf84jm3h37", "patient_bulb_h67htrw5yd", "sweet_oyster_clzv48lhq5",
-                "dreamy_night_pg8g25vb72", "green_prune_3jd5v4h1p2", "jolly_plate_w9vr36jgg4",
-                "sincere_kitchen_2mgcv5w65d", "clever_train_6k77vt5d01", "good_yacht_gjxdvkhxvg",
-                "sincere_kitchen_vlbtkqsf5f", "teal_atemoya_5twc5bh411", "maroon_cheese_7dych1zwxy",
-                "green_curtain_vtgxw75n43", "cool_quince_65rt4g50qw", "gentle_quince_6dmnf317ls",
-                "witty_office_xhwpm61k5h", "maroon_carrot_ylmtx2j0z4", "great_kumquat_5v4kbfr1jg",
-                "ivory_nail_723gmdlh0t", "tough_seed_5hcjhgtfyh", "yellow_pear_z5kxgzqqk6",
-                "ashy_okra_y2kjvzr1qk"]
+        job_ids = ["helpful_duck_q8pgsrj0sb", "calm_battery_xgwbt99hg9", "quirky_wing_gqy29j47d1", "cyan_plow_hx0hqbf5fd", "magenta_machine_wgmjmg1w22", 
+                   "purple_planet_vr129q38ql", "placid_beach_t6c182fgyh", "zen_rice_94w4vl9xbk", "ivory_fowl_1254x87q71", "joyful_carrot_6cqs202rpf",
+                   "tough_zebra_qrqv939gm5", "icy_boniato_b5yh1949kl", "sharp_planet_w8x0fgt2cm", "olive_date_f6x0p43gk4", "mango_cat_49w5kztsn4",
+                   "willing_cloud_t0w6bbgzyd", "jovial_muscle_xzdrbvczd1", "helpful_duck_q8pgsrj0sb", "amiable_date_c6ygz8ydg2"]
     
     target_components = ["dataloader",  "segmentation"]
+    # Other options: "masker", "trafficsigns", "reconstruction"
     
     print(f"Connecting to Workspace: {args.ws}...")
     # Logic: Initialize the client ONCE outside the loop to save time
