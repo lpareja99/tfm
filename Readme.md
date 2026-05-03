@@ -90,7 +90,9 @@ Images:
 - mask2formerSwing_basicDefects
 - mask2formerHRNet
 - mask2formerInternImage
+- mask2formerInternImage_Base
 - mask2formerFlashInternImage
+- mask2formerFlashInternImage_Base
 - mask2formerBeit2 
 
 Parent/Child structure:
@@ -130,6 +132,11 @@ az ml data create --file scripts/azure/db_creation.yml \
 az login --use-device-code --tenant 5aaed097-32a1-44a7-b7a1-b9bda7b4392c
 
 python scripts/azure/download_job.py --output-dir ./data/laura_tfm_sun_22_dry/
+```
+
+7. Convert to cvat
+``` bash
+
 ```
 
 ``` bash

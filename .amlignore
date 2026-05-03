@@ -11,3 +11,4 @@ work_dir
 mmsegmentation
 **/output/*
 **/out/*
+results/

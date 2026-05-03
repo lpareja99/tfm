@@ -105,3 +105,27 @@ mim test mmseg config_tiny.py \
     --cfg-options \
     test_dataloader.dataset.data_prefix.seg_map_path=labels_basic_defects_relabel
 
+num_params_millions:
+	python -c "
+	from mmengine.config import Config
+	from mmseg.models import build_segmentor
+	cfg = Config.fromfile('config_tiny.py')
+	model = build_segmentor(cfg.model)
+	params = sum(p.numel() for p in model.parameters())
+	print(f'Total Parameters: {params / 1e6:.2f} M')
+	"
+
+predictions:
+	mim run mmseg test config.py output/best_mIoU_iter_17000_swin_t.pth --out output/predictions.pkl
+
+
+config = config.py
+checkpoint = output/best_mIoU_iter_17000_swin_t.pth
+work_dir = ./output
+
+benchmark:
+	mim run mmseg benchmark {config} {checkpoint} --work-dir {work_dir}
+
+	mim run mmseg benchmark config.py output/best_mIoU_iter_10000_intern_t.pth --work-dir ./output
+
+seeds = 42, 1337, 2026, 777, 91

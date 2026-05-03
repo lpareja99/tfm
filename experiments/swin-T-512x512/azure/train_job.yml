@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 # name: train_yaml
 
-display_name: swing_tiny_final
+display_name: swing_tiny_final_seed_42
 experiment_name: mask2former_parent_child_experiments
 description: classes relabeld to not have to include null clases
 
@@ -18,12 +18,14 @@ inputs:
     path: azureml:mask2former_swin_tiny_512x512_base_model@latest
     mode: ro_mount
   labels_folder: "labels_basic_defects_relabel"
-
+  seed: 42
+  
+# seeds: 42, 1337, 2026, 777, 91
 
 outputs:
   output_path:
     type: uri_folder
-    path: azureml://datastores/workspaceblobstore/paths/checkpoints/final/swin_tiny
+    path: azureml://datastores/workspaceblobstore/paths/checkpoints/final/swin_tiny_seed_42
     mode: rw_mount
 
 code: "../"
@@ -36,7 +38,7 @@ command: >-
   --labels_folder ${{inputs.labels_folder}}
   --weights ${{inputs.pretrained_weights}}
   --work_dir ${{outputs.output_path}}
-
+  --cfg-options randomness.seed=${{inputs.seed}} randomness.deterministic=False
 
 environment:
   image: crflowityartifacts.azurecr.io/roadai/laura_tfm:swin_t_child

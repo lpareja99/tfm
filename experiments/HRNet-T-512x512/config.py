@@ -1,7 +1,7 @@
 _base_ = ['mmseg::mask2former/mask2former_r50_8xb2-160k_ade20k-512x512.py']
 
 data_root =  "data/2026-01-19-defect_dataset/"
-label_dir = "labels_cracks"
+label_dir = "labels_basic_defects_relabel"
 log_level = 'INFO'
 work_dir = None
 dataset_type = 'BaseSegDataset'

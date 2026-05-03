@@ -25,3 +25,4 @@ tensorboard
 mlflow 
 azureml-mlflow
 azureml-core
+timm

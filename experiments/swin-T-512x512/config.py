@@ -1,5 +1,5 @@
 # ===========================================================================
-# EXPERIMENT 1A: Swin-T-512x512 - Crack Only CONFIG
+#
 #
 # Note: This configuration is set for Azure, the local configuration
 #       is changed dynamically on the Makefile
@@ -108,7 +108,12 @@ val_evaluator = dict(
     output_dir=f'{work_dir}/eval_results'
 )
 
-test_evaluator = val_evaluator
+test_evaluator = dict(
+    type='IoUMetric',
+    iou_metrics=['mIoU', 'mDice', 'mFscore'],
+    keep_results=True,           # OBLIGATORIO para generar el dump
+    outfile_prefix=f'{work_dir}/test_res' # El nombre base del archivo
+)
 
 albu_train_transforms = [
     dict(
@@ -172,7 +177,7 @@ train_dataloader = dict(
         ann_file='splits/train.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path='labels'),
+        data_prefix=dict(img_path='images', seg_map_path='labels_basic_defects_relabel'),
         metainfo=metainfo,
         pipeline=train_pipeline,
         reduce_zero_label=False))
@@ -185,7 +190,7 @@ val_dataloader = dict(
         ann_file='splits/val.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path='labels'),
+        data_prefix=dict(img_path='images', seg_map_path='labels_basic_defects_relabel'),
         metainfo=metainfo,
         pipeline=test_pipeline,
         reduce_zero_label=False))
@@ -198,7 +203,7 @@ test_dataloader = dict(
         ann_file='splits/test.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path='labels'),
+        data_prefix=dict(img_path='images', seg_map_path='labels_basic_defects_relabel'),
         metainfo=metainfo,
         pipeline=test_pipeline,
         reduce_zero_label=False))
@@ -220,3 +225,6 @@ test_cfg = dict(type='TestLoop')
 param_scheduler = [
     dict(type='PolyLR', begin=0, end=max_iterations, power=0.9, by_epoch=False)
 ]
+test_evaluator.update(dict(outfile_prefix='output/test_res'))
+
+randomness = dict(seed=None, deterministic=False)

@@ -187,7 +187,7 @@ train_dataloader = dict(
         ann_file='splits/train.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path='labels'),
+        data_prefix=dict(img_path='images', seg_map_path='labels_basic_defects_relabel'),
         metainfo=metainfo,
         pipeline=train_pipeline,
         reduce_zero_label=False))
@@ -200,7 +200,7 @@ val_dataloader = dict(
         ann_file='splits/val.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path='labels'),
+        data_prefix=dict(img_path='images', seg_map_path='labels_basic_defects_relabel'),
         metainfo=metainfo,
         pipeline=test_pipeline,
         reduce_zero_label=False))
@@ -213,7 +213,7 @@ test_dataloader = dict(
         ann_file='splits/test.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path='labels'),
+        data_prefix=dict(img_path='images', seg_map_path='labels_basic_defects_relabel'),
         metainfo=metainfo,
         pipeline=test_pipeline,
         reduce_zero_label=False))

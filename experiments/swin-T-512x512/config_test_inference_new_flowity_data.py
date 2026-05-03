@@ -1,17 +1,17 @@
-_base_ = ['mmseg::mask2former/mask2former_r50_8xb2-160k_ade20k-512x512.py']
+# ===========================================================================
+# EXPERIMENT 1A: Swin-T-512x512 - Crack Only CONFIG
+#
+# Note: This configuration is set for Azure, the local configuration
+#       is changed dynamically on the Makefile
+# ===========================================================================
 
-custom_imports = dict(imports=['custom_modules.backbone.intern_image'], allow_failed_imports=False)
-
-data_root =  "data/2026-01-19-defect_dataset"
-label_dir = "labels_basic_defects_relabel"
-log_level = 'INFO'
-work_dir = './work_dirs/InternImageBasic'
-dataset_type = 'BaseSegDataset'
-
+data_root = "/app/data/2026-01-19-defect_dataset"
+work_dir = "inference_new_flowity_data"
 resume = True
 
-class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe", "edge_cracks", "fretting", "pothole", "manhole", "pole_shadow")
+_base_ = ['mmseg::mask2former/mask2former_swin-t_8xb2-160k_ade20k-512x512.py']
 
+class_names = ("bg", "cracks", "cracks_alligator", "cracks_severe", "edge_cracks", "fretting", "pothole", "manhole", "pole_shadow")
 palette = [
     [0, 0, 0],       # bg - Black
     [250, 50, 83],   # cracks - Red/Pink
@@ -28,6 +28,9 @@ metainfo = dict(
     classes=class_names,
     palette=palette
 )
+   
+log_level = 'INFO'
+dataset_type = 'BaseSegDataset'
 
 num_classes = len(class_names)
 img_num = 5800
@@ -45,40 +48,21 @@ print(f"---> Training for {max_iterations} iterations.")
 
 # 1. Model Config
 model = dict(
-    type='EncoderDecoder',
-    backbone=dict(
-        type='InternImage',
-        _delete_=True,
-        core_op='DCNv3',
-        channels=64,
-        depths=[4, 4, 18, 4],
-        groups=[4, 8, 16, 32],
-        mlp_ratio=4.,
-        drop_path_rate=0.2,
-        norm_layer='LN',
-        layer_scale=1.0,
-        offset_scale=1.0,
-        post_norm=False,
-        with_cp=False,
-        out_indices=(0, 1, 2, 3),
-        init_cfg=dict(type='Pretrained', checkpoint='models/internimage_t_1k_224.pth')
-    ),
     decode_head=dict(
-        type='Mask2FormerHead',
-        in_channels=[64, 128, 256, 512], # Default for InternImage-T
         num_classes=num_classes, 
+        out_channels=num_classes,
         ignore_index=255,
         loss_cls=dict(
             type='CrossEntropyLoss',
             use_sigmoid=False,
             loss_weight=2.0,
             reduction='mean',
-            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1]
-        ),
+            class_weight=[0.1] + [1.0] * (num_classes - 1) + [0.1] #class adjustment, less weight on background 
+        )
     )
 )
 
-
+# 3. Early Stopping and Hooks
 custom_hooks = [
     dict(
         type='EarlyStoppingHook',
@@ -91,7 +75,7 @@ custom_hooks = [
 
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
-    logger=dict(type='LoggerHook', interval=100, log_metric_by_epoch=False),
+    logger=dict(type='LoggerHook', interval=log_interval, log_metric_by_epoch=False),
     param_scheduler=dict(type='ParamSchedulerHook'),
     checkpoint=dict(
         type='CheckpointHook', 
@@ -105,40 +89,42 @@ default_hooks = dict(
     visualization=dict(
         type='SegVisualizationHook', 
         draw=True,
-        interval=10
-    )
+        interval=10)
+    
 )
-
-vis_backends = [dict(type='LocalVisBackend'),
-                dict(type='TensorboardVisBackend',
-                    save_dir=f'{work_dir}/results/vis_data')
-                ]
 
 visualizer = dict(
     type='SegLocalVisualizer', 
-    vis_backends=vis_backends, 
+    vis_backends=[dict(type='LocalVisBackend')], 
     save_dir=f'{work_dir}/results',
     name='visualizer',
     alpha=0.6
 )
 
+# Ensure the evaluator is present so the hook has data to monitor
 val_evaluator = dict(
     type='IoUMetric',
     iou_metrics=['mIoU', 'mDice', 'mFscore'],
     output_dir=f'{work_dir}/eval_results'
 )
-test_evaluator = val_evaluator
+
+test_evaluator = dict(
+    type='IoUMetric',
+    iou_metrics=['mIoU', 'mDice', 'mFscore'],
+    keep_results=True,           # OBLIGATORIO para generar el dump
+    outfile_prefix=f'{work_dir}/test_res' # El nombre base del archivo
+)
 
 albu_train_transforms = [
     dict(
         type='OneOf',
         transforms=[
             # Blur limit defines kernel sizes (must be odd). 
-            dict(type='GaussianBlur', blur_limit=(3, 5), p=1.0),
+            dict(type='GaussianBlur', blur_limit=(1, 3), p=1.0),
             # Variance limit controls the severity of the noise.
-            dict(type='GaussNoise', var_limit=(10.0, 50.0), p=1.0),
+            dict(type='GaussNoise', var_limit=(5.0, 30.0), p=1.0),
         ],
-        p=0.5  # 50% chance to apply either Blur or Noise. 50% chance to do nothing (Identity).
+        p=0.3  # 30% chance to apply either Blur or Noise. 70% chance to do nothing (Identity).
     )
 ]
 
@@ -146,6 +132,18 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', reduce_zero_label=False), # Crucial fix
     dict(type='RandomResize', scale=(2048, 512), ratio_range=(0.5, 2.0), keep_ratio=True),
+    
+    # Investigate if I should add this or keep what I currently have 
+    
+    # dict(type='RandomResize', 
+    #      scale=(1280, 720), 
+    #      ratio_range=(0.5, 2.0), # Wider range to simulate GoPro vs Phone
+    #      keep_ratio=True), # MANDATORY to prevent defect distortion
+    
+    # # Pad to the largest possible size your hardware produces (e.g., 720p)
+    # # This makes the "different sizes" uniform for the GPU tensors
+    # dict(type='Pad', size=(1280, 720), pad_val=dict(img=(0, 0, 0), mask=0)),
+    
     
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
 
@@ -166,12 +164,12 @@ train_pipeline = [
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', scale=(2048, 512), keep_ratio=True),
-    dict(type='LoadAnnotations', reduce_zero_label=False), # Crucial fix
+    dict(type='LoadAnnotations', reduce_zero_label=False),
     dict(type='PackSegInputs')
 ]
 
 train_dataloader = dict(
-    batch_size=batch_size, # Safety for your 4070
+    batch_size=batch_size,
     num_workers=num_workers,
     dataset=dict(
         type=dataset_type,
@@ -179,27 +177,10 @@ train_dataloader = dict(
         ann_file='splits/train.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path=label_dir),
+        data_prefix=dict(img_path='images', seg_map_path='labels_basic_defects_relabel'),
         metainfo=metainfo,
         pipeline=train_pipeline,
-        reduce_zero_label=False
-    )
-)
-
-test_dataloader = dict(
-    batch_size=1,
-    dataset=dict(
-        type=dataset_type,
-        data_root=data_root,
-        ann_file='splits/test.txt',
-        img_suffix='.jpg',
-        seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path=label_dir),
-        metainfo=metainfo,
-        pipeline=test_pipeline,
-        reduce_zero_label=False
-    )
-)
+        reduce_zero_label=False))
 
 val_dataloader = dict(
     batch_size=1,
@@ -209,21 +190,33 @@ val_dataloader = dict(
         ann_file='splits/val.txt',
         img_suffix='.jpg',
         seg_map_suffix='.png',
-        data_prefix=dict(img_path='images', seg_map_path=label_dir),
+        data_prefix=dict(img_path='images', seg_map_path='labels_basic_defects_relabel'),
         metainfo=metainfo,
         pipeline=test_pipeline,
-        reduce_zero_label=False
-    )
-)
+        reduce_zero_label=False))
+
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file='splits/test_ready.txt',
+        img_suffix='.jpg',
+        seg_map_suffix='.png',
+        data_prefix=dict(img_path='images', seg_map_path='labels_test_ids_ready'),
+        metainfo=metainfo,
+        pipeline=test_pipeline,
+        reduce_zero_label=False))
+
 
 # Running Settings
 work_dir = work_dir
 
 train_cfg = dict(
     _delete_=True,
-    type='IterBasedTrainLoop',  # Changed from EpochBasedTrainLoop
-    max_iters= max_iterations,             # 750 iters * 5 epochs
-    val_interval= val_interval           # Validate exactly once per "epoch"
+    type='IterBasedTrainLoop',  
+    max_iters= max_iterations,             
+    val_interval= val_interval
 )
 
 val_cfg = dict(type='ValLoop')
@@ -232,3 +225,4 @@ test_cfg = dict(type='TestLoop')
 param_scheduler = [
     dict(type='PolyLR', begin=0, end=max_iterations, power=0.9, by_epoch=False)
 ]
+test_evaluator.update(dict(outfile_prefix='output/test_res'))
