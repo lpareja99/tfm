@@ -1,0 +1,27 @@
+
+==============================
+COMPLEXITY RESULTS
+==============================
+Full Model Parameters: 47.28 M
+Backbone GFLOPs: 25.61 G
+==============================
+
+Detailed Parameter Breakdown:
+| name                            | #elements or shape   |
+|:--------------------------------|:---------------------|
+| model                           | 47.3M                |
+| backbone                        | 27.5M                |
+| backbone.patch_embed            | 4.9K                 |
+| backbone.stages                 | 27.5M                |
+| backbone.norm0                  | 0.2K                 |
+| backbone.norm1                  | 0.4K                 |
+| backbone.norm2                  | 0.8K                 |
+| backbone.norm3                  | 1.5K                 |
+| decode_head                     | 19.8M                |
+| decode_head.pixel_decoder       | 5.4M                 |
+| decode_head.transformer_decoder | 14.2M                |
+| decode_head.query_embed         | 25.6K                |
+| decode_head.query_feat          | 25.6K                |
+| decode_head.level_embed         | 0.8K                 |
+| decode_head.cls_embed           | 2.6K                 |
+| decode_head.mask_embed          | 0.1M                 |
