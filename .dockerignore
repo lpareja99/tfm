@@ -19,10 +19,15 @@ venv/
 **/work_dir/
 **/mmsegmentation/
 **/hugging_faces_trial/
+**/out/
+**/output/
 
 # Large Artifacts & Logs
-*.zip
-*.pth
-*.tar.gz
-*.mp4
-*.log
+**/*.zip
+**/*.pth
+**/*.tar.gz
+**/*.mp4
+**/*.log
+
+
+

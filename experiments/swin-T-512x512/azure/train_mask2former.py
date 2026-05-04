@@ -7,6 +7,7 @@ parser.add_argument('--data_root', type=str)
 parser.add_argument('--labels_folder', type=str)
 parser.add_argument('--weights', type=str)
 parser.add_argument('--work_dir', type=str)
+parser.add_argument('--seed', type=int)
 args = parser.parse_args()
 
 cmd_parts = [
@@ -25,6 +26,8 @@ cmd_parts = [
     f"val_evaluator.output_dir='{args.work_dir}/eval_results'",
     f"test_evaluator.output_dir='{args.work_dir}/eval_results'",
     f"load_from={args.weights}",
+    f"randomness.seed={args.seed}",
+    f"randomness.deterministic=False",
 ]
 
 train_cmd = " ".join(cmd_parts)

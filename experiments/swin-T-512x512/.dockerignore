@@ -10,4 +10,7 @@ work_dir
 .vscode
 mmsegmentation
 **/output/*
+**/out/*
+data/
+models/*.pth
 

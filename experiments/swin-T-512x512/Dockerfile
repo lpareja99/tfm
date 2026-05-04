@@ -11,7 +11,4 @@ COPY Makefile .
 COPY runs/ ./runs/
 COPY experiments/swin-T-512x512/ .
 
-COPY experiments/swin-T-512x512/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
 CMD ["bash"]
