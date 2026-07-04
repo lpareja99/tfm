@@ -75,6 +75,19 @@ model = dict(
 )
 
 
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(
+        type='AdamW', lr=0.0001, weight_decay=0.05),
+    clip_grad=dict(max_norm=0.01, norm_type=2),
+    paramwise_cfg=dict(
+        custom_keys={
+            'backbone': dict(lr_mult=0.1), # Backbone learns 10x slower
+        }
+    )
+)
+
+
 custom_hooks = [
     dict(
         type='EarlyStoppingHook',

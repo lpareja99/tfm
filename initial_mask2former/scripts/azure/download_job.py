@@ -8,9 +8,9 @@ def get_args():
     parser = argparse.ArgumentParser(description="Download and flatten Azure ML pipeline component outputs.")
     parser.add_argument("--job-id", type=str, help="The Parent Job ID (e.g., tender_stomach_mhgc9vmn9p)")
     parser.add_argument("--output-dir", type=str, default="download_job", help="The local directory to save downloaded artifacts")
-    parser.add_argument("--sub", type=str, default="2dcd4ebb-39e0-451f-9dcb-9a3ec70e0299", help="Subscription ID")
-    parser.add_argument("--rg", type=str, default="rg-flowityanalytics-testing", help="Resource Group name")
-    parser.add_argument("--ws", type=str, default="ml-analytics-testing", help="Workspace name")
+    parser.add_argument("--sub", type=str, default=os.environ.get("AZ_SUBSCRIPTION"), help="Subscription ID (or set AZ_SUBSCRIPTION)")
+    parser.add_argument("--rg", type=str, default=os.environ.get("AZ_RESOURCE_GROUP"), help="Resource Group name (or set AZ_RESOURCE_GROUP)")
+    parser.add_argument("--ws", type=str, default=os.environ.get("AZ_WORKSPACE"), help="Workspace name (or set AZ_WORKSPACE)")
     return parser.parse_args()
 
 def lift_output_folders(ml_client, job_name, base_path):

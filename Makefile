@@ -11,6 +11,10 @@ var_5a = 5a_beit2_base.env
 
 include runs/$(var_$(EXP))
 
+# Azure/ACR coordinates come from a gitignored .env (see .env.example).
+# `-include` = do not fail if .env is absent (e.g. on a fresh clone).
+-include .env
+
 # =============
 # general
 # =============
@@ -71,9 +75,9 @@ train-local:
 train-azure:
 	az ml job create \
 		--file $(AZURE_TRAIN) \
-		--subscription 2dcd4ebb-39e0-451f-9dcb-9a3ec70e0299 \
-		--resource-group rg-flowityanalytics-testing \
-		--workspace-name ml-analytics-testing
+		--subscription $(AZ_SUBSCRIPTION) \
+		--resource-group $(AZ_RESOURCE_GROUP) \
+		--workspace-name $(AZ_WORKSPACE)
 
 
 test-local:
@@ -99,11 +103,23 @@ test:
 		--label-dir $(LABEL)
 
 
-mim test mmseg config_tiny.py \
-    --checkpoint output/best_mIoU_iter_28000_flash.pth \
-    --show-dir output/test_visuals \
-    --cfg-options \
-    test_dataloader.dataset.data_prefix.seg_map_path=labels_basic_defects_relabel
+# ==========================================
+# test-flowity (§4.1) — inference on the FLOWITY test set
+#   Historical command used to evaluate every model on Flowity data.
+#   (Adverse-weather robustness inference §4.2 is the `weather` target below.)
+#   usage: make test-flowity FLOWITY_CONFIG=config.py \
+#          FLOWITY_CHECKPOINT=output/best_mIoU_iter_XXXX.pth FLOWITY_WORK_DIR=output
+# ==========================================
+FLOWITY_CONFIG ?= config.py
+FLOWITY_CHECKPOINT ?= output/best_mIoU_iter_28000_flash.pth
+FLOWITY_WORK_DIR ?= output
+test-flowity:
+	mim test mmseg $(FLOWITY_CONFIG) \
+		--checkpoint $(FLOWITY_CHECKPOINT) \
+		--work-dir $(FLOWITY_WORK_DIR) \
+		--show-dir $(FLOWITY_WORK_DIR)/test_visuals \
+		--cfg-options \
+		test_dataloader.dataset.data_prefix.seg_map_path=labels_basic_defects_relabel
 
 num_params_millions:
 	python -c "
@@ -129,3 +145,32 @@ benchmark:
 	mim run mmseg benchmark config.py output/best_mIoU_iter_10000_intern_t.pth --work-dir ./output
 
 seeds = 42, 1337, 2026, 777, 91
+
+download_job_azure:
+	python3 initial_mask2former/scripts/azure/download_job.py \
+  		--job-id <NOMBRE_JOB_PADRE> \
+  	    --output-dir descargas_azure
+
+
+run_jupyter:
+	docker run --rm -p 8888:8888 \
+  		-v /home/lpa/Documentos/tfm:/app -w /app \
+  		road_defect_base:latest \
+  		jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''
+
+# ==========================================
+# weather (§4.2) — adverse-weather robustness inference (all 5 models)
+#   Single runner run_weather.sh; it picks image/config/checkpoint and device per
+#   model (flash/interimage require GPU; swin/hrnet/beit run on CPU or GPU).
+#   usage: make weather MODEL=swin MODE=smoke
+#          make weather MODEL=flash MODE=full
+#   SEED is OPTIONAL (defaults to each model's best seed); pass it only to
+#   override and try another seed:  make weather MODEL=swin MODE=full SEED=42
+#   outputs: out_weather/<MODEL>/<cond>/{pred_masks,vis}
+# ==========================================
+MODEL ?= swin
+MODE ?= smoke
+DEVICE ?= auto
+SEED ?=
+weather:
+	bash run_weather.sh $(MODEL) $(MODE) $(DEVICE) $(SEED)

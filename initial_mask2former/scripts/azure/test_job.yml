@@ -2,7 +2,7 @@ $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 
 display_name: mask2former-test-evaluation
 experiment_name: mask2former_tfm_test
-compute: azureml:MODELTRAINING
+compute: azureml:${AZ_COMPUTE}
 
 inputs:
   test_dataset:
@@ -31,4 +31,4 @@ command: >-
   --out_dir ${{outputs.test_results}}
 
 environment:
-  image: crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerSwing
+  image: ${ACR_REGISTRY}/roadai/laura_tfm:mask2formerSwing

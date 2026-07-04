@@ -1,0 +1,41 @@
+# ===========================================================================
+# Image for LOCAL InterImage inference on an sm_50 GPU (Quadro M1200).
+# FROM road_defect_base; downloads and compiles the DCNv3 op for sm_50.
+# InterImage's normal (Azure) Dockerfile compiles DCNv3 for sm 7.0-8.6; this one
+# targets sm_50 (Maxwell) so it runs on the local GPU (analogous to flash's).
+#
+# Build (context = repo root; nothing is copied from it, DCNv3 is fetched):
+#   docker build -t road_defect_intern \
+#     -f experiments/InterImage-T-512x512/Dockerfile.local .
+# ===========================================================================
+FROM road_defect_base:latest
+
+ENV CUDA_HOME=/usr/local/cuda \
+    FORCE_CUDA="1" \
+    TORCH_CUDA_ARCH_LIST="5.0" \
+    MAX_JOBS=4
+
+RUN apt-get update && apt-get install -y --no-install-recommends unzip wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# fetch the DCNv3 source (OpenGVLab/InternImage), same layout as the Azure build
+RUN mkdir -p /opt && \
+    wget -q https://github.com/OpenGVLab/InternImage/archive/refs/heads/master.zip -O /tmp/ii.zip && \
+    unzip -q /tmp/ii.zip "InternImage-master/segmentation/ops_dcnv3/*" -d /opt/ && \
+    mv /opt/InternImage-master/segmentation/ops_dcnv3 /opt/ops_dcnv3 && \
+    rm -rf /opt/InternImage-master /tmp/ii.zip
+
+# mock_cuda: 'docker build' has no GPU; pretend CUDA is available so make.sh
+# compiles the CUDAExtension (FORCE_CUDA + arch sm_50).
+WORKDIR /opt/ops_dcnv3
+RUN printf 'import torch\ntorch.cuda.is_available = lambda: True\n' > mock_cuda.py && \
+    sed -i '1i import mock_cuda' setup.py && \
+    sh make.sh && \
+    rm -rf build
+
+# InterImage backbone deps
+RUN pip install --no-cache-dir "timm<1.0" yacs einops
+
+WORKDIR /app
+# NOTE: DCNv3 import is validated at runtime (smoke with --gpus), not at build (no GPU).
+CMD ["bash"]

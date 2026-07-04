@@ -1,0 +1,62 @@
+# ==========================================================================
+# Data, weights and heavy outputs — NEVER in git (re-downloadable or backed up
+# on external disk; see docs/RECOVERY.md and DESCARGAS_AZURE_INDEX.md).
+# ==========================================================================
+
+# Datasets (Kaggle weather set + Flowity defect set) — re-downloadable
+data/
+
+# Azure ML training downloads (~102 GB): checkpoints + logs. Local + external disk.
+descargas_azure/
+
+# Pretrained backbone cache — public downloads, see models/README.md
+models/
+
+# Inference / evaluation outputs
+out_weather/
+results/
+**/outputx5/
+**/work_dirs/
+**/vis/
+**/default/
+**/None/
+notebooks/results_analysis/figures/
+
+# Model weights and archives (any location)
+*.pth
+*.pt
+*.ckpt
+*.pkl
+*.zip
+*.tar
+*.tar.gz
+
+# Experiment-local pretrained weights / vendored ops build artifacts
+experiments/*/models/
+experiments/*/custom_modules/models/
+experiments/**/ops_dcnv3/
+experiments/**/ops_dcnv4/
+
+# Exploratory / archived material (history preserved in backup branches/tags)
+archive/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Environment / secrets
+.env
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs / scratch
+*.log
+out_flowity_queue.log

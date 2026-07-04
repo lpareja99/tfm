@@ -1,0 +1,46 @@
+# ===========================================================================
+# Image for LOCAL FlashInternImage inference on an sm_50 GPU (Quadro M1200).
+# FROM road_defect_base; compiles and installs the DCNv4 op for sm_50.
+# Patches FlashDeformAttn's 'raise NotImplementedError' (which requires sm>=7.0
+# and is NOT used by the backbone) so the DCNv4 package can be imported.
+#
+# Build (context = this experiment's ops_dcnv4 folder):
+#   docker build -t road_defect_flash:latest \
+#     -f experiments/flashInternImage-T-512x512/Dockerfile.local \
+#     experiments/flashInternImage-T-512x512/custom_modules/ops_dcnv4
+# ===========================================================================
+FROM road_defect_base:latest
+
+ENV TORCH_CUDA_ARCH_LIST="5.0" \
+    FORCE_CUDA="1" \
+    CUDA_HOME="/usr/local/cuda"
+
+COPY . /opt/ops_dcnv4
+
+# patch: FlashDeformAttn requires sm>=7.0; the backbone uses the DCNv4 conv, not that.
+RUN python - <<'PY'
+p = '/opt/ops_dcnv4/DCNv4/functions/flash_deform_attn_func.py'
+s = open(p).read()
+s = s.replace(
+    'if cuda_capability not in shm_size_dict:\n    raise NotImplementedError',
+    'if cuda_capability not in shm_size_dict:\n    shm_size_dict[cuda_capability] = 64000'
+)
+open(p, 'w').write(s)
+print('>>> flash_deform_attn_func patch applied')
+PY
+
+# mock_cuda: 'docker build' has no GPU; pretend CUDA is available so setup.py
+# compiles the CUDAExtension (with FORCE_CUDA + arch sm_50).
+RUN cd /opt/ops_dcnv4 && \
+    printf 'import torch\ntorch.cuda.is_available = lambda: True\n' > mock_cuda.py && \
+    sed -i '1i import mock_cuda' setup.py && \
+    python setup.py build install && \
+    rm -rf build dist *.egg-info
+
+# FlashInternImage backbone deps (last: doesn't invalidate the compile layer)
+RUN pip install --no-cache-dir "timm<1.0" yacs einops
+
+# NOTE: 'import DCNv4' is not tested at build time: the module reads
+# get_device_properties(0) on import and the build has no GPU. Validated at
+# runtime (smoke with --gpus).
+CMD ["bash"]

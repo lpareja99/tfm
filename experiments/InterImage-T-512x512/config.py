@@ -89,6 +89,19 @@ custom_hooks = [
     )
 ]
 
+
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(type='AdamW', lr=1e-4, weight_decay=0.05),
+    paramwise_cfg=dict(
+        custom_keys={
+            'backbone': dict(lr_mult=0.1),
+        }
+    ),
+    clip_grad=dict(max_norm=0.01, norm_type=2)
+)
+
+
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=100, log_metric_by_epoch=False),

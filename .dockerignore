@@ -29,5 +29,12 @@ venv/
 **/*.mp4
 **/*.log
 
+# Large local dirs (never part of any image build context)
+descargas_azure/
+out_weather/
+results/
+models/
+data/
+
 
 

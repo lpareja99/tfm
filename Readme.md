@@ -82,7 +82,7 @@ Option to only have to pass the work-directory
 before: export DOCKER_BUILDKIT=0
 ``` bash
 export DOCKER_BUILDKIT=1 
-docker build --tag crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerSwing -f ./Dockerfile .
+docker build --tag ${ACR_REGISTRY}/roadai/laura_tfm:mask2formerSwing -f ./Dockerfile .
 ```
 
 Images:
@@ -106,25 +106,25 @@ Parent/Child structure:
 
 2. loging to azure 
 ``` bash
-az acr login -n crflowityartifacts
+az acr login -n ${ACR_REGISTRY}
 ```
 
 3. Push img: 
 ``` bash 
-docker push crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerSwing 
+docker push ${ACR_REGISTRY}/roadai/laura_tfm:mask2formerSwing 
 ```
 
 4. run job 
 ``` bash 
-az ml job create --subscription 2dcd4ebb-39e0-451f-9dcb-9a3ec70e0299 --resource-group rg-flowityanalytics-testing --workspace-name ml-analytics-testing --file ./azure/train_job.yml
+az ml job create --subscription ${AZ_SUBSCRIPTION} --resource-group ${AZ_RESOURCE_GROUP} --workspace-name ${AZ_WORKSPACE} --file ./azure/train_job.yml
 ```
 
 5. create and update db
 ``` bash
 az ml data create --file scripts/azure/db_creation.yml \
---subscription 2dcd4ebb-39e0-451f-9dcb-9a3ec70e0299 \
---resource-group rg-flowityanalytics-testing \
---workspace-name ml-analytics-testing
+--subscription ${AZ_SUBSCRIPTION} \
+--resource-group ${AZ_RESOURCE_GROUP} \
+--workspace-name ${AZ_WORKSPACE}
 ```
 
 6. Download flowity analysis 

@@ -1,0 +1,41 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+
+display_name: flash_weather_test
+experiment_name: mask2former_weather_eval
+description: Inferencia robustez clima (dry/wet/half) de FlashInternImage seed 777
+
+compute: azureml:${AZ_COMPUTE}
+
+inputs:
+  weather:
+    type: uri_folder
+    path: azureml:weather_defect_data@latest
+    mode: ro_mount
+  ckpt:
+    type: uri_file
+    path: azureml:flash_seed777_ckpt@latest
+    mode: ro_mount
+
+outputs:
+  out:
+    type: uri_folder
+    path: azureml://datastores/workspaceblobstore/paths/weather_results/flash_seed777
+    mode: rw_mount
+
+code: "../"
+
+command: >-
+  export PYTHONPATH=$PYTHONPATH:$(pwd) &&
+  for c in dry wet half; do
+  echo "==== FLASH | $c ====" &&
+  mim test mmseg config_base.py
+  --checkpoint ${{inputs.ckpt}}
+  --work-dir ${{outputs.out}}/flash_$c
+  --cfg-options
+  test_dataloader.dataset.data_root=${{inputs.weather}}
+  test_dataloader.dataset.ann_file=splits/$c.txt
+  test_dataloader.dataset.data_prefix.seg_map_path=labels ;
+  done
+
+environment:
+  image: ${ACR_REGISTRY}/roadai/laura_tfm:mask2formerFlashInternImage

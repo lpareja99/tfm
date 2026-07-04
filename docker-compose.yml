@@ -40,7 +40,7 @@ services:
   # =====================================================================================================
   
   swin-experiment:
-    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:swin_t_child
+    image: ${ACR_REGISTRY}/roadai/laura_tfm:swin_t_child
     deploy:
       resources:
         reservations:
@@ -60,7 +60,7 @@ services:
     working_dir: /app
 
   hrnet-experiment:
-    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:hrnet_t_child
+    image: ${ACR_REGISTRY}/roadai/laura_tfm:hrnet_t_child
     shm_size: '8gb'
     deploy:
       resources:
@@ -80,7 +80,7 @@ services:
     working_dir: /app
 
   intern-experiment:
-    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:interimage_t_child
+    image: ${ACR_REGISTRY}/roadai/laura_tfm:interimage_t_child
     shm_size: '8gb'
     deploy:
       resources:
@@ -102,7 +102,7 @@ services:
     working_dir: /app
 
   flash-intern-experiment:
-    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:flashinterimage_t_child
+    image: ${ACR_REGISTRY}/roadai/laura_tfm:flashinterimage_t_child
     shm_size: '8gb'
     ports:
       - "6006:6006"
@@ -126,7 +126,7 @@ services:
     working_dir: /app
 
   beit2-experiment:
-    image: crflowityartifacts.azurecr.io/roadai/laura_tfm:beit2_b_child
+    image: ${ACR_REGISTRY}/roadai/laura_tfm:beit2_b_child
     shm_size: '8gb'
     deploy:
       resources:

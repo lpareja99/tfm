@@ -24,8 +24,15 @@ future
 tensorboard
 
 # Azure ML SDK
-mlflow 
+mlflow
 azureml-mlflow
 azureml-core
 azure-ai-ml
 azure-identity
+
+# Results-analysis notebooks (notebooks/results_analysis/)
+pandas
+openpyxl        # read/write the *_analytics_*.xlsx
+itables         # init_notebook_mode() interactive tables
+scikit-image    # skimage.skeletonize (qualitative centerline recall)
+tabulate        # DataFrame.to_markdown

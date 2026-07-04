@@ -234,3 +234,5 @@ test_cfg = dict(type='TestLoop')
 param_scheduler = [
     dict(type='PolyLR', begin=0, end=max_iterations, power=0.9, by_epoch=False)
 ]
+
+randomness = dict(seed=None, deterministic=False)

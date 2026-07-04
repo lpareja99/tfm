@@ -5,7 +5,7 @@ display_name: flsh_intern_image_b_final
 experiment_name: mask2former_parent_child_experiments
 description: classes relabeld to not have to include null clases
 
-compute: azureml:MODELTRAINING
+compute: azureml:${AZ_COMPUTE}
 
 inputs:
   input_dataset:
@@ -38,4 +38,4 @@ command: >-
 
 
 environment:
-  image: crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerFlashInternImage
+  image: ${ACR_REGISTRY}/roadai/laura_tfm:mask2formerFlashInternImage

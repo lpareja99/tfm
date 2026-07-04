@@ -6,7 +6,7 @@ experiment_name: hrnet_tfm_train
 description: Train defect model for 19-02-26 dataset with augmentation with crack classes (not joined)and pretrained weights from the base model
 
 # invoke completions (Ctrl+Space, Cmd+Space) to see the list of computes available
-compute: azureml:MODELTRAINING
+compute: azureml:${AZ_COMPUTE}
 # This defines the input data to mount. The names of the items in inputs can be referenced in the command
 inputs:
   input_dataset:
@@ -44,4 +44,4 @@ command: >-
 
 
 environment:
-  image: crflowityartifacts.azurecr.io/roadai/laura_tfm:mask2formerHRNet
+  image: ${ACR_REGISTRY}/roadai/laura_tfm:mask2formerHRNet

@@ -3,7 +3,8 @@
 # To run the container locally (run at root level):
 # $ docker compose run --rm interimage-t bash
 
-FROM crflowityartifacts.azurecr.io/roadai/laura_tfm:base_img
+ARG ACR_REGISTRY=your-registry.azurecr.io
+FROM ${ACR_REGISTRY}/roadai/laura_tfm:base_img
 
 RUN apt-get update && apt-get install -y --no-install-recommends unzip wget \
     && rm -rf /var/lib/apt/lists/* 

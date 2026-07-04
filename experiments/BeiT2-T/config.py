@@ -1,5 +1,5 @@
 # ===========================================================================
-# EXPERIMENT 1A: Swin-T-512x512 - Crack Only CONFIG
+# EXPERIMENT 1A: BeiT Base-512x512 - Crack Only CONFIG
 #
 # Note: This configuration is set for Azure, the local configuration
 #       is changed dynamically on the Makefile
@@ -71,7 +71,7 @@ model = dict(
         type='MultiLevelNeck',
         in_channels=[768, 768, 768, 768], # Must match the embed_dims from backbone
         out_channels=256,
-        scales=[4, 2, 1, 0.5]             # Rescales plain ViT features into a pyramid (1/4, 1/8, 1/16, 1/32)
+        scales=[4, 2, 1, 0.5],             # Rescales plain ViT features into a pyramid (1/4, 1/8, 1/16, 1/32)
     ),
     decode_head=dict(
         in_channels=[256, 256, 256, 256], # Must match the neck's out_channels
@@ -99,6 +99,17 @@ custom_hooks = [
         patience=5,          # Number of validations to wait
     )
 ]
+
+optim_wrapper = dict(
+    type='OptimWrapper',
+    optimizer=dict(type='AdamW', lr=1e-4, weight_decay=0.05),
+    paramwise_cfg=dict(
+        custom_keys={
+            'backbone': dict(lr_mult=0.1),
+        }
+    ),
+    clip_grad=dict(max_norm=0.01, norm_type=2)
+)
 
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
@@ -235,3 +246,5 @@ test_cfg = dict(type='TestLoop')
 param_scheduler = [
     dict(type='PolyLR', begin=0, end=max_iterations, power=0.9, by_epoch=False)
 ]
+
+randomness = dict(seed=None, deterministic=False)

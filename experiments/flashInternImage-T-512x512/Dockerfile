@@ -3,7 +3,8 @@
 # To run the container locally (run at root level):
 # $ docker compose run --rm flashinternimage-t-hijo bash
 
-FROM crflowityartifacts.azurecr.io/roadai/laura_tfm:base_img
+ARG ACR_REGISTRY=your-registry.azurecr.io
+FROM ${ACR_REGISTRY}/roadai/laura_tfm:base_img
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

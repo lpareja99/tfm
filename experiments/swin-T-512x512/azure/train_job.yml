@@ -6,7 +6,7 @@ experiment_name: mask2former_parent_child_experiments
 description: classes relabeld to not have to include null clases
 
 # invoke completions (Ctrl+Space, Cmd+Space) to see the list of computes available
-compute: azureml:MODELTRAINING
+compute: azureml:${AZ_COMPUTE}
 # This defines the input data to mount. The names of the items in inputs can be referenced in the command
 inputs:
   input_dataset:
@@ -41,4 +41,4 @@ command: >-
   --seed ${{inputs.seed}}
 
 environment:
-  image: crflowityartifacts.azurecr.io/roadai/laura_tfm:swin_t_child
+  image: ${ACR_REGISTRY}/roadai/laura_tfm:swin_t_child
