@@ -1,10 +1,6 @@
 data
-descargas_azure
-out_weather
 work_dirs
 work_dir
-models
-results/
 exploratory
 notebooks
 mmsegmentation

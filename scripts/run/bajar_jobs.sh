@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ===========================================================================
 # Descarga SECUENCIAL de jobs de Azure ML (logs + outputs + checkpoints).
-# Cada job se descarga en descargas_azure/<modelo>/seed_<N>/.
+# Cada job se descarga en data/checkpoints/<modelo>/seed_<N>/.
 # - Continúa aunque uno falle (no aborta la cola).
 # - Es RE-EJECUTABLE: salta los que ya tienen un .pth descargado (resume).
 # - Salta las celdas cuyo nombre de job esté vacío (placeholder sin rellenar).
@@ -9,8 +9,8 @@
 # Uso normal:
 #     bash scripts/run/bajar_jobs.sh
 # Desatendido (sobrevive cerrar la terminal):
-#     nohup bash scripts/run/bajar_jobs.sh > descargas_azure/_download.log 2>&1 &
-#     tail -f descargas_azure/_download.log     # Ctrl-C solo corta el tail
+#     nohup bash scripts/run/bajar_jobs.sh > data/checkpoints/_download.log 2>&1 &
+#     tail -f data/checkpoints/_download.log     # Ctrl-C solo corta el tail
 # ===========================================================================
 set -uo pipefail
 # run from repo root regardless of CWD (this script lives in scripts/run/)
@@ -20,7 +20,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
 [ -f .env ] && { set -a; . ./.env; set +a; }
 RG="${AZ_RESOURCE_GROUP:?set AZ_RESOURCE_GROUP in .env}"
 WS="${AZ_WORKSPACE:?set AZ_WORKSPACE in .env}"
-OUT=descargas_azure                 # carpeta raíz de descargas
+OUT=data/checkpoints                 # carpeta raíz de descargas
 
 # ---------------------------------------------------------------------------
 # RELLENA el nombre de job de cada celda (job hijo de 'segmentation', o el

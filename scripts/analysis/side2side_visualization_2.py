@@ -18,7 +18,7 @@ DIR_PRED_SWIN = Path("data/output/swin/eval_results")
 DIR_PRED_FLASH = Path("data/output/flash/eval_results")
 SPLIT_FILE = BASE_DIR / "splits" / "test_ready.txt"
 
-DIR_OUTPUT_VIS = Path("results/side2side_full_frame_analysis")
+DIR_OUTPUT_VIS = Path("data/output/results/side2side_full_frame_analysis")
 MAX_IMAGES = 20 
 
 # ==============================================================================

@@ -63,8 +63,8 @@ docker run --rm $GPU_ARGS --shm-size=8g \
   "$IMAGE" \
   bash -lc '
     set -e
-    CKPT=$(find /app/descargas_azure/$MODEL/seed_$SEED -name "best_mIoU_iter_*.pth" 2>/dev/null | sort -t_ -k4 -n | tail -1)
-    [ -z "$CKPT" ] && { echo "ERROR: no checkpoint under descargas_azure/$MODEL/seed_$SEED"; exit 3; }
+    CKPT=$(find /app/data/checkpoints/$MODEL/seed_$SEED -name "best_mIoU_iter_*.pth" 2>/dev/null | sort -t_ -k4 -n | tail -1)
+    [ -z "$CKPT" ] && { echo "ERROR: no checkpoint under data/checkpoints/$MODEL/seed_$SEED"; exit 3; }
     echo "checkpoint: $CKPT"
     [ "$CUSTOM_IMPORT" = "1" ] && export PYTHONPATH=$(pwd):$PYTHONPATH
     mim test mmseg config_test.py --checkpoint "$CKPT" \

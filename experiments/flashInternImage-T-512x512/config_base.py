@@ -61,7 +61,7 @@ model = dict(
         post_norm=False,
         with_cp=False,
         out_indices=(0, 1, 2, 3),
-        init_cfg=dict(type='Pretrained', checkpoint='models/flash_intern_image_b_1k_224.pth')
+        init_cfg=dict(type='Pretrained', checkpoint='data/pretrained/flash_intern_image_b_1k_224.pth')
     ),
     decode_head=dict(
         type='Mask2FormerHead',

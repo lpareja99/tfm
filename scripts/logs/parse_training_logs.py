@@ -2,7 +2,7 @@
 """
 Regenerate the `training_analytics_<model>.xlsx` files consumed by
 notebooks/results_analysis/traning_result_analysis.ipynb, by parsing the mmseg
-training logs already downloaded under descargas_azure/<model>/seed_<S>/.
+training logs already downloaded under data/checkpoints/<model>/seed_<S>/.
 
 Each output row = one validation point of a training run, with:
   seed, iter, loss, loss_cls, loss_mask, loss_dice, lr, grad_norm,
@@ -15,7 +15,7 @@ the per-class table + `Iter(val)` summary provide the validation metrics.
 
 Usage:
     python scripts/logs/parse_training_logs.py \
-        --azure descargas_azure --out notebooks/results_analysis
+        --azure data/checkpoints --out notebooks/results_analysis
 """
 import argparse
 import glob
@@ -27,7 +27,7 @@ import pandas as pd
 CLASSES = ["bg", "cracks", "cracks_alligator", "cracks_severe", "edge_cracks",
            "fretting", "pothole", "manhole", "pole_shadow"]
 
-# descargas_azure dir  ->  notebook file suffix (model_files keys)
+# data/checkpoints dir  ->  notebook file suffix (model_files keys)
 MODEL_MAP = {
     "swin": "swin",
     "beit": "beit",
@@ -158,7 +158,7 @@ def parse_log(path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--azure", default="descargas_azure")
+    ap.add_argument("--azure", default="data/checkpoints")
     ap.add_argument("--out", default="notebooks/results_analysis")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
@@ -227,7 +227,7 @@ def main():
                     r["seed"] = seed
                 all_rows.extend(rows)
                 print(f"  {adir}/{seed}: {len(rows)} val rows (to iter {max_iter}) "
-                      f"<- {log.split('descargas_azure/')[-1]}")
+                      f"<- {log.split('data/checkpoints/')[-1]}")
         if not all_rows:
             print(f"[!] {adir}: no rows, skipping")
             continue

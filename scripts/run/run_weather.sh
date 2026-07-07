@@ -13,9 +13,9 @@
 # Examples:
 #   bash scripts/run/run_weather.sh swin smoke
 #   bash scripts/run/run_weather.sh flash full
-#   nohup bash scripts/run/run_weather.sh interimage full > out_weather/interimage/full.log 2>&1 &
+#   nohup bash scripts/run/run_weather.sh interimage full > data/output/weather/interimage/full.log 2>&1 &
 #
-# Outputs: out_weather/<model>/<cond>/  (pred_masks/ + vis/ + logs)
+# Outputs: data/output/weather/<model>/<cond>/  (pred_masks/ + vis/ + logs)
 # ===========================================================================
 set -uo pipefail
 # repo root (this script lives in scripts/run/) — works from any CWD
@@ -62,7 +62,7 @@ if [ "$MODE" = "smoke" ]; then
 else
   CONDS="dry wet half"; echo ">>> $MODEL | FULL ($CONDS) | device=$DEVICE | seed=$SEED"
 fi
-mkdir -p "$TFM/out_weather/$MODEL"
+mkdir -p "$TFM/data/output/weather/$MODEL"
 
 docker run --rm $GPU_ARGS --shm-size=8g \
   -e CUDA_VISIBLE_DEVICES="$CVD" \
@@ -73,15 +73,15 @@ docker run --rm $GPU_ARGS --shm-size=8g \
   bash -lc '
     set -e
     # winner checkpoint = latest best_mIoU (highest iter) for the chosen seed
-    CKPT=$(find /app/descargas_azure/$MODEL/seed_$SEED -name "best_mIoU_iter_*.pth" 2>/dev/null | sort -t_ -k4 -n | tail -1)
-    if [ -z "$CKPT" ]; then echo "ERROR: no checkpoint under descargas_azure/$MODEL/seed_$SEED"; exit 3; fi
+    CKPT=$(find /app/data/checkpoints/$MODEL/seed_$SEED -name "best_mIoU_iter_*.pth" 2>/dev/null | sort -t_ -k4 -n | tail -1)
+    if [ -z "$CKPT" ]; then echo "ERROR: no checkpoint under data/checkpoints/$MODEL/seed_$SEED"; exit 3; fi
     echo "checkpoint: $CKPT"
     [ "$CUSTOM_IMPORT" = "1" ] && export PYTHONPATH=$(pwd):$PYTHONPATH   # for config custom_imports
     for c in $CONDS; do
       echo "======== $MODEL | condition: $c ========"
       mim test mmseg config_test.py --checkpoint "$CKPT" \
-        --work-dir /app/out_weather/$MODEL/$c \
-        --out /app/out_weather/$MODEL/$c/pred_masks \
+        --work-dir /app/data/output/weather/$MODEL/$c \
+        --out /app/data/output/weather/$MODEL/$c/pred_masks \
         --show-dir vis \
         --cfg-options \
           test_dataloader.dataset.data_root=/app/data/final_dataset \
@@ -93,5 +93,5 @@ docker run --rm $GPU_ARGS --shm-size=8g \
 
 echo
 echo "=== mIoU SUMMARY ($MODEL) ==="
-grep -rhiE "mIoU" "$TFM"/out_weather/$MODEL/*/ 2>/dev/null | grep -iE "aAcc|mIoU" | tail -10
-echo "(outputs in out_weather/$MODEL/<cond>/ ; masks in pred_masks/)"
+grep -rhiE "mIoU" "$TFM"/data/output/weather/$MODEL/*/ 2>/dev/null | grep -iE "aAcc|mIoU" | tail -10
+echo "(outputs in data/output/weather/$MODEL/<cond>/ ; masks in pred_masks/)"

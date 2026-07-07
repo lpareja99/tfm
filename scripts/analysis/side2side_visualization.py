@@ -22,7 +22,7 @@ DIR_PRED_FLASH = Path("data/output/flash/eval_results")
 SPLIT_FILE = BASE_DIR / "splits" / "test_ready.txt"
 
 # Salida
-DIR_OUTPUT_VIS = Path("results/side2side_visualization")
+DIR_OUTPUT_VIS = Path("data/output/results/side2side_visualization")
 MAX_IMAGES = 20  # Cambia a None para procesar todo el dataset
 
 # ==============================================================================

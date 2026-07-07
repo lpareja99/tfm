@@ -149,7 +149,7 @@ seeds = 42, 1337, 2026, 777, 91
 download_job_azure:
 	python3 scripts/azure/download_job.py \
   		--job-id <NOMBRE_JOB_PADRE> \
-  	    --output-dir descargas_azure
+  	    --output-dir data/checkpoints
 
 
 run_jupyter:
@@ -166,7 +166,7 @@ run_jupyter:
 #          make weather MODEL=flash MODE=full
 #   SEED is OPTIONAL (defaults to each model's best seed); pass it only to
 #   override and try another seed:  make weather MODEL=swin MODE=full SEED=42
-#   outputs: out_weather/<MODEL>/<cond>/{pred_masks,vis}
+#   outputs: data/output/weather/<MODEL>/<cond>/{pred_masks,vis}
 # ==========================================
 MODEL ?= swin
 MODE ?= smoke

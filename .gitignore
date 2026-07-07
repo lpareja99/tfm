@@ -3,18 +3,9 @@
 # on external disk; see docs/RECOVERY.md and DESCARGAS_AZURE_INDEX.md).
 # ==========================================================================
 
-# Datasets (Kaggle weather set + Flowity defect set) — re-downloadable
+# Everything lives under data/ now (all gitignored — re-downloadable / on external backup):
+#   data/input... datasets · data/pretrained (backbone cache) · data/checkpoints (~102 GB Azure downloads) · data/output (inference results)
 data/
-
-# Azure ML training downloads (~102 GB): checkpoints + logs. Local + external disk.
-descargas_azure/
-
-# Pretrained backbone cache — public downloads, see models/README.md
-models/
-
-# Inference / evaluation outputs
-out_weather/
-results/
 **/outputx5/
 **/work_dirs/
 **/vis/
