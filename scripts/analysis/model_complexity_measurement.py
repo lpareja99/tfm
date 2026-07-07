@@ -1,13 +1,17 @@
+import sys
 import torch
 from fvcore.nn import FlopCountAnalysis, parameter_count_table
 from mmseg.apis import init_model
 
-config_file = 'config.py'
-checkpoint_file = 'output/best_mIoU_iter_17000_swin_t.pth'
+# Usage: python model_complexity_measurement.py <config.py> [checkpoint.pth]
+# checkpoint is optional (parameter/GFLOP counts do not need trained weights).
+config_file = sys.argv[1] if len(sys.argv) > 1 else 'config.py'
+checkpoint_file = sys.argv[2] if len(sys.argv) > 2 else None
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
-print(f"--- Analyzing: {checkpoint_file} ---")
+print(f"--- Analyzing: {config_file} (checkpoint: {checkpoint_file or 'none'}, device: {device}) ---")
 
-model = init_model(config_file, checkpoint_file, device='cuda:0')
+model = init_model(config_file, checkpoint_file, device=device)
 model.eval()
 
 # 1. Total Parameters (Full Model)
@@ -16,7 +20,7 @@ total_params = sum(p.numel() for p in model.parameters())
 
 # 2. GFLOPs (Isolating the Backbone)
 # We analyze the backbone because Mask2FormerHead forward is too complex for tracers
-dummy_input = torch.randn((1, 3, 512, 512)).cuda()
+dummy_input = torch.randn((1, 3, 512, 512)).to(device)
 flops = FlopCountAnalysis(model.backbone, dummy_input)
 backbone_flops = flops.total()
 
