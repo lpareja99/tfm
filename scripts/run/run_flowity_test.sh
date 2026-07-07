@@ -9,14 +9,15 @@
 # repoints the data to Flowity via --cfg-options.
 #
 # Usage:
-#   bash run_flowity_test.sh <model> [mode] [seed] [device]
+#   bash scripts/run/run_flowity_test.sh <model> [mode] [seed] [device]
 #     model : swin | flash | hrnet | beit | interimage
 #     mode  : smoke (3 imgs) | full (default, 723 imgs)
 #     seed  : checkpoint seed (default = the "winner" seed used by the qualitative notebook)
 #     device: auto (default) | gpu | cpu   (flash/interimage are GPU-only)
 # ===========================================================================
 set -uo pipefail
-TFM=/home/lpa/Documentos/tfm
+# repo root (this script lives in scripts/run/) — works from any CWD
+TFM="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 FLOW="$TFM/data/2026-01-19-defect_dataset"
 
 MODEL="${1:?model required: swin|flash|hrnet|beit|interimage}"

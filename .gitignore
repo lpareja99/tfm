@@ -60,3 +60,6 @@ venv/
 # Logs / scratch
 *.log
 out_flowity_queue.log
+
+# stray find-dump
+output.txt

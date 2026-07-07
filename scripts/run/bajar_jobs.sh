@@ -7,12 +7,14 @@
 # - Salta las celdas cuyo nombre de job esté vacío (placeholder sin rellenar).
 #
 # Uso normal:
-#     bash bajar_jobs.sh
+#     bash scripts/run/bajar_jobs.sh
 # Desatendido (sobrevive cerrar la terminal):
-#     nohup bash bajar_jobs.sh > descargas_azure/_download.log 2>&1 &
+#     nohup bash scripts/run/bajar_jobs.sh > descargas_azure/_download.log 2>&1 &
 #     tail -f descargas_azure/_download.log     # Ctrl-C solo corta el tail
 # ===========================================================================
 set -uo pipefail
+# run from repo root regardless of CWD (this script lives in scripts/run/)
+cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
 
 # Azure coordinates from the gitignored .env (see .env.example)
 [ -f .env ] && { set -a; . ./.env; set +a; }

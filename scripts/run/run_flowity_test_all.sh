@@ -4,13 +4,13 @@
 # container at a time. IDEMPOTENT: skips any (model, seed) whose raw_masks/
 # folder is already complete (723 masks). Safe to stop and re-launch.
 #
-#   Run in background:  nohup bash run_flowity_test_all.sh > out_flowity_queue.log 2>&1 &
+#   Run in background:  nohup bash scripts/run/run_flowity_test_all.sh > out_flowity_queue.log 2>&1 &
 #
 # Produces raw_masks/ (for the qualitative notebook, winner seeds) and per-run
 # metric logs (parsed later into testing_analytics_<model>.xlsx).
 # ===========================================================================
 set -uo pipefail
-cd /home/lpa/Documentos/tfm
+cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
 TOT=723
 
 declare -A EXP=(
@@ -33,7 +33,7 @@ for m in $MODELS; do
       continue
     fi
     echo "----- RUN  $m seed_$s  ($(date '+%H:%M')) -----"
-    bash run_flowity_test.sh "$m" full "$s" 2>&1 \
+    bash scripts/run/run_flowity_test.sh "$m" full "$s" 2>&1 \
       | grep -aE "checkpoint:|Iter\(test\) \[723|mIoU:|ERROR|masks in" | tail -4 \
       || echo ">>> FAILED $m seed_$s"
   done

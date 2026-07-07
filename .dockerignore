@@ -18,7 +18,6 @@ venv/
 **/work_dirs/
 **/work_dir/
 **/mmsegmentation/
-**/hugging_faces_trial/
 **/out/
 **/output/
 
@@ -36,5 +35,6 @@ results/
 models/
 data/
 
-
+# Exploratory / historical work — never needed inside any image
+exploratory/
 

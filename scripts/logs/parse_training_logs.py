@@ -14,7 +14,7 @@ Losses/lr/grad_norm/time come from the nearest preceding `Iter(train)` line;
 the per-class table + `Iter(val)` summary provide the validation metrics.
 
 Usage:
-    python scripts/parse_training_logs.py \
+    python scripts/logs/parse_training_logs.py \
         --azure descargas_azure --out notebooks/results_analysis
 """
 import argparse

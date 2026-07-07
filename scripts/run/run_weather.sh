@@ -4,21 +4,22 @@
 # Single parametrized runner -> supersedes run_swin_weather_cpu.sh / run_flash_weather_gpu.sh.
 #
 # Usage:
-#   bash run_weather.sh <model> [mode] [device] [seed]
+#   bash scripts/run/run_weather.sh <model> [mode] [device] [seed]
 #     model  : swin | flash | hrnet | beit | interimage
 #     mode   : smoke (3 imgs, default) | full (dry wet half)
 #     device : auto (default) | gpu | cpu   (flash/interimage IGNORE this: GPU-only)
 #     seed   : checkpoint seed (defaults to each model's known best seed)
 #
 # Examples:
-#   bash run_weather.sh swin smoke
-#   bash run_weather.sh flash full
-#   nohup bash run_weather.sh interimage full > out_weather/interimage/full.log 2>&1 &
+#   bash scripts/run/run_weather.sh swin smoke
+#   bash scripts/run/run_weather.sh flash full
+#   nohup bash scripts/run/run_weather.sh interimage full > out_weather/interimage/full.log 2>&1 &
 #
 # Outputs: out_weather/<model>/<cond>/  (pred_masks/ + vis/ + logs)
 # ===========================================================================
 set -uo pipefail
-TFM=/home/lpa/Documentos/tfm
+# repo root (this script lives in scripts/run/) — works from any CWD
+TFM="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DATA="$TFM/data/final_dataset"
 
 MODEL="${1:?model required: swin|flash|hrnet|beit|interimage}"

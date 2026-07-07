@@ -9,7 +9,7 @@ Resize de las mascaras del dataset de clima para que CASEN con las imagenes.
 
 Correr DENTRO del contenedor road_defect_base (tiene PIL/numpy):
   docker run --rm -v /home/lpa/Documentos/tfm:/app -w /app \
-    road_defect_base:latest python3 scripts/resize_weather_labels.py
+    road_defect_base:latest python3 scripts/data_prep/resize_weather_labels.py
 """
 import glob, os
 import numpy as np

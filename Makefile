@@ -25,16 +25,16 @@ input_dir ?= "./data/laura_tfm_dry_annotated/test_annotation_output"
 tfm_data_output ?= "./data/final_test_dataset/"
 
 download-job-flowity-pipeline:
-	python3 initial_mask2former/scripts/azure/download_job.py --job-id $(jobs) --output-dir $(output_dir)
+	python3 scripts/azure/download_job.py --job-id $(jobs) --output-dir $(output_dir)
 
 cvat_input_annotation_cration:
-	python3 initial_mask2former/scripts/mask_to_cvat.py --input-dir $(jobs2)
+	python3 scripts/data_prep/mask_to_cvat.py --input-dir $(jobs2)
 
 cvat_output_organization_mapping:
-	python3 initial_mask2former/scripts/save_cvat_output.py --cvat-dir $(input_dir) --work-dir $(output_dir)
+	python3 scripts/data_prep/save_cvat_output.py --cvat-dir $(input_dir) --work-dir $(output_dir)
 
 build_test_dataset:
-	python3 initial_mask2former/scripts/build_test_dataset_cvat.py --work-dir $(output_dir) --output-dir $(tfm_data_output)
+	python3 scripts/data_prep/build_test_dataset_cvat.py --work-dir $(output_dir) --output-dir $(tfm_data_output)
 
 # ==========================================
 # train-local
@@ -97,7 +97,7 @@ test-local:
 # test
 # ==========================================
 test:
-	python initial_mask2former/scripts/mim_test_executer.py \
+	python exploratory/initial_mask2former/scripts/mim_test_executer.py \
 		--work-dir $(WORK_DIR) \
 		--data-root $(LOCAL_DATA) \
 		--label-dir $(LABEL)
@@ -147,7 +147,7 @@ benchmark:
 seeds = 42, 1337, 2026, 777, 91
 
 download_job_azure:
-	python3 initial_mask2former/scripts/azure/download_job.py \
+	python3 scripts/azure/download_job.py \
   		--job-id <NOMBRE_JOB_PADRE> \
   	    --output-dir descargas_azure
 
@@ -160,7 +160,7 @@ run_jupyter:
 
 # ==========================================
 # weather (§4.2) — adverse-weather robustness inference (all 5 models)
-#   Single runner run_weather.sh; it picks image/config/checkpoint and device per
+#   Single runner scripts/run/run_weather.sh; it picks image/config/checkpoint and device per
 #   model (flash/interimage require GPU; swin/hrnet/beit run on CPU or GPU).
 #   usage: make weather MODEL=swin MODE=smoke
 #          make weather MODEL=flash MODE=full
@@ -173,4 +173,4 @@ MODE ?= smoke
 DEVICE ?= auto
 SEED ?=
 weather:
-	bash run_weather.sh $(MODEL) $(MODE) $(DEVICE) $(SEED)
+	bash scripts/run/run_weather.sh $(MODEL) $(MODE) $(DEVICE) $(SEED)

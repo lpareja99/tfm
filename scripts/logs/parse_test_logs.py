@@ -2,7 +2,7 @@
 """
 Build the `testing_analytics_<model>.xlsx` files consumed by
 notebooks/results_analysis/test_result_analysis_flowity.ipynb, from the Flowity
-TEST runs produced by run_flowity_test.sh (logs under
+TEST runs produced by scripts/run/run_flowity_test.sh (logs under
 experiments/<exp>/outputx5/seed_<S>/test/<ts>/<ts>.log).
 
 One row per (model, seed): aAcc, mIoU, mAcc, mDice, mFscore, mPrecision, mRecall,
@@ -11,7 +11,7 @@ iter (checkpoint iter) and per-class {IoU,Acc,Dice,Fscore,Precision,Recall}.
 NOTE: metrics use config_test.py's test pipeline; they may differ slightly from
 the original thesis numbers if the original used a different test-time scale.
 
-Usage:  python scripts/parse_test_logs.py --out notebooks/results_analysis
+Usage:  python scripts/logs/parse_test_logs.py --out notebooks/results_analysis
 """
 import argparse, glob, os, re
 import pandas as pd
