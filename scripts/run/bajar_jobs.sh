@@ -23,45 +23,22 @@ WS="${AZ_WORKSPACE:?set AZ_WORKSPACE in .env}"
 OUT=data/checkpoints                 # carpeta raíz de descargas
 
 # ---------------------------------------------------------------------------
-# RELLENA el nombre de job de cada celda (job hijo de 'segmentation', o el
-# padre si baja los outputs).  Formato:  "NOMBRE_JOB|modelo/seed_XX"
-# Deja el nombre vacío ("|modelo/seed_XX") o comenta (#) los que no tengas aún.
+# Fill in one entry per (model, seed) with your Azure ML job name.
+#   Format:  "JOB_NAME|model/seed_XX"   (leave empty "|model/seed_XX" or comment
+#   out the ones you don't have yet). The author's filled list (job names are
+#   workspace-internal) is kept in the gitignored README.local.md — paste it here.
 # ---------------------------------------------------------------------------
 jobs=(
   # --- BEiT2 ---
-  # "zen_scooter_ybmc5rkdk9|beit/seed_91"        # (ya descargado)
-  #"willing_station_tt4hlbrkzd|beit/seed_1337"
-  "funny_rain_0q7kld0zhm|beit/seed_42"
-  #"|beit/seed_777"
-  #"|beit/seed_2026"
-
+  # "<job-name>|beit/seed_42"
   # --- Swin ---
-  "bubbly_cart_qpqn6mygc3|swin/seed_42"
-  "tough_drain_671qflbgcl|swin/seed_91"
-  "happy_stone_sm2mnh8n27|swin/seed_777"
-  "upbeat_apricot_qvxr7n26wv|swin/seed_1337"
-  "placid_knot_gth13qtwl5|swin/seed_2026"
-
+  # "<job-name>|swin/seed_91"
   # --- HRNet ---
-  "bubbly_dog_0wl4zcs99k|hrnet/seed_42"
-  "maroon_rail_2q6ym25kkl|hrnet/seed_91"
-  "modest_arch_zkg8y9m0th|hrnet/seed_777"
-  "willing_station_tt4hlbrkzd|hrnet/seed_1337"
-  "crimson_cherry_gb6p059fv2|hrnet/seed_2026"
-
+  # "<job-name>|hrnet/seed_1337"
   # --- InterImage ---
-  "bold_rocket_vp9t1x82tm|interimage/seed_42"
-  "lime_thread_9x1yrry0td|interimage/seed_91"
-  "joyful_garage_ccwb2fxzkq|interimage/seed_777"
-  "magenta_lime_19hglz0v6t|interimage/seed_1337"
-  "mango_van_zwb38n5kk8|interimage/seed_2026"
-
+  # "<job-name>|interimage/seed_91"
   # --- FlashInternImage ---
-  "silly_lunch_9j1stpjz93|flash/seed_42"
-  "sad_angle_d0q95n3f29|flash/seed_91"
-  "red_rail_rthhv4y8v8|flash/seed_777"
-  "amusing_flower_fq9ffpdth6|flash/seed_1337"
-  "joyful_nail_xp2rv6ql16|flash/seed_2026"
+  # "<job-name>|flash/seed_777"
 )
 
 ts() { date +%H:%M:%S; }

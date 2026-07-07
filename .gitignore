@@ -1,6 +1,6 @@
 # ==========================================================================
 # Data, weights and heavy outputs — NEVER in git (re-downloadable or backed up
-# on external disk; see docs/RECOVERY.md and DESCARGAS_AZURE_INDEX.md).
+# on external disk; see docs/RECOVERY.md).
 # ==========================================================================
 
 # Everything lives under data/ now (all gitignored — re-downloadable / on external backup):
@@ -38,8 +38,9 @@ __pycache__/
 .ipynb_checkpoints/
 .pytest_cache/
 
-# Environment / secrets
+# Environment / secrets / private notes
 .env
+README.local.md
 .venv/
 venv/
 
